@@ -1,0 +1,9 @@
+<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- jog move badge -->
+  <circle cx="12" cy="12" r="11" fill="#ffffff" stroke="#334155" stroke-width="1.5" />
+  <g stroke="#334155" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 4v16M4 12h16" />
+    <path d="M9 7L12 4L15 7M9 17L12 20L15 17M7 9L4 12L7 15M17 9L20 12L17 15" />
+  </g>
+</svg>
