@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 const MIN = 10;
 const MAX = 1500;
-const DEFAULT_VALUE = 300;
 
 function round1(value: number): number {
     return Math.round(value * 10) / 10;
@@ -16,15 +15,24 @@ function stepFor(value: number): number {
     return Math.max(0.1, round1(value * 0.01));
 }
 
-export default function FeedRateInput(): ReactNode {
-    const [value, setValue] = useState(DEFAULT_VALUE);
-    const [text, setText] = useState(DEFAULT_VALUE.toFixed(1));
+export default function FeedRateInput({
+    value,
+    onChange,
+}: {
+    value: number;
+    onChange: (value: number) => void;
+}): ReactNode {
+    const [text, setText] = useState(value.toFixed(1));
+    const [prevValue, setPrevValue] = useState(value);
     const inputRef = useRef<HTMLInputElement>(null);
 
+    if (value !== prevValue) {
+        setPrevValue(value);
+        setText(value.toFixed(1));
+    }
+
     const commit = (next: number) => {
-        const corrected = round1(clamp(next));
-        setValue(corrected);
-        setText(corrected.toFixed(1));
+        onChange(round1(clamp(next)));
     };
 
     useEffect(() => {
@@ -34,18 +42,12 @@ export default function FeedRateInput(): ReactNode {
         const onWheel = (e: WheelEvent) => {
             e.preventDefault();
             const direction = e.deltaY < 0 ? -1 : 1;
-            setValue(prev => {
-                const corrected = round1(
-                    clamp(prev + direction * stepFor(prev))
-                );
-                setText(corrected.toFixed(1));
-                return corrected;
-            });
+            onChange(round1(clamp(value + direction * stepFor(value))));
         };
 
         el.addEventListener('wheel', onWheel, { passive: false });
         return () => el.removeEventListener('wheel', onWheel);
-    }, []);
+    }, [value, onChange]);
 
     return (
         <div className="flex items-center gap-1.5 text-sm text-slate-500">
