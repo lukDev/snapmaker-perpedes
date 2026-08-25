@@ -8,6 +8,7 @@ const TRACKED_KEYS = [
     'KeyD',
     'ArrowUp',
     'ArrowDown',
+    'Space',
 ] as const;
 type TrackedKey = (typeof TRACKED_KEYS)[number];
 
@@ -18,6 +19,7 @@ const LABELS: Record<TrackedKey, string> = {
     KeyD: 'X+',
     ArrowUp: 'Z+',
     ArrowDown: 'Z-',
+    Space: 'STOP',
 };
 
 function useTrackedKeys(): Set<TrackedKey> {
@@ -26,8 +28,14 @@ function useTrackedKeys(): Set<TrackedKey> {
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
             if (!TRACKED_KEYS.includes(e.code as TrackedKey)) return;
+            if (e.code === 'Space') {
+                e.preventDefault();
+                setPressed(new Set(['Space']));
+                return;
+            }
             setPressed(prev => {
-                if (prev.has(e.code as TrackedKey)) return prev;
+                if (prev.has('Space') || prev.has(e.code as TrackedKey))
+                    return prev;
                 const next = new Set(prev);
                 next.add(e.code as TrackedKey);
                 return next;
@@ -44,15 +52,27 @@ function useTrackedKeys(): Set<TrackedKey> {
             });
         };
 
-        const onBlur = () => setPressed(new Set());
+        const engageStop = () => setPressed(new Set(['Space']));
+        const releaseAll = () => setPressed(new Set());
+        const onVisibilityChange = () => {
+            if (document.hidden) engageStop();
+            else releaseAll();
+        };
 
         window.addEventListener('keydown', onKeyDown);
         window.addEventListener('keyup', onKeyUp);
-        window.addEventListener('blur', onBlur);
+        window.addEventListener('blur', engageStop);
+        window.addEventListener('focus', releaseAll);
+        document.addEventListener('visibilitychange', onVisibilityChange);
         return () => {
             window.removeEventListener('keydown', onKeyDown);
             window.removeEventListener('keyup', onKeyUp);
-            window.removeEventListener('blur', onBlur);
+            window.removeEventListener('blur', engageStop);
+            window.removeEventListener('focus', releaseAll);
+            document.removeEventListener(
+                'visibilitychange',
+                onVisibilityChange
+            );
         };
     }, []);
 
@@ -78,11 +98,27 @@ function Key({
     );
 }
 
+function StopKey({ active }: { active: boolean }): ReactNode {
+    return (
+        <div
+            className={`flex h-16 w-full items-center justify-center rounded-xl border-2 text-2xl font-bold tracking-wide transition-all duration-75 select-none ${
+                active
+                    ? 'scale-95 border-red-600 bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.5)]'
+                    : 'border-red-300 bg-red-50 text-red-600 shadow-sm'
+            }`}>
+            {LABELS.Space}
+        </div>
+    );
+}
+
 export default function KeyPanel(): ReactNode {
     const pressed = useTrackedKeys();
 
     return (
         <div className="relative flex flex-col items-center gap-6 rounded-2xl border border-slate-200 bg-white p-10 shadow-xl">
+            <div className="absolute top-4 right-4">
+                <FeedRateInput />
+            </div>
             <div className="flex items-center gap-10">
                 <div className="flex flex-col items-center gap-2">
                     <Key code="KeyW" active={pressed.has('KeyW')} />
@@ -101,9 +137,8 @@ export default function KeyPanel(): ReactNode {
                     <Key code="ArrowDown" active={pressed.has('ArrowDown')} />
                 </div>
             </div>
-            <div className="absolute right-4 bottom-3">
-                <FeedRateInput />
-            </div>
+            <div className="h-px w-full bg-slate-200" />
+            <StopKey active={pressed.has('Space')} />
         </div>
     );
 }
