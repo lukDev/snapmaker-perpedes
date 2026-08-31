@@ -14,7 +14,8 @@ export type TrackedKey = (typeof TRACKED_KEYS)[number];
 export function useTrackedKeys(
     enabled: boolean,
     onKeyDown: (code: TrackedKey) => void,
-    onKeyUp: (code: TrackedKey) => void
+    onKeyUp: (code: TrackedKey) => void,
+    onStop: () => void
 ): Set<TrackedKey> {
     const [pressed, setPressed] = useState<Set<TrackedKey>>(new Set());
     const [prevEnabled, setPrevEnabled] = useState(enabled);
@@ -34,6 +35,7 @@ export function useTrackedKeys(
             if (code === 'Space') {
                 e.preventDefault();
                 setPressed(new Set(['Space']));
+                onStop();
                 return;
             }
             setPressed(prev => {
@@ -59,7 +61,7 @@ export function useTrackedKeys(
 
         const engageStop = () => {
             setPressed(new Set(['Space']));
-            for (const key of TRACKED_KEYS) onKeyUp(key);
+            onStop();
         };
         const releaseAll = () => setPressed(new Set());
         const onVisibilityChange = () => {
@@ -82,7 +84,7 @@ export function useTrackedKeys(
                 onVisibilityChange
             );
         };
-    }, [enabled, onKeyDown, onKeyUp]);
+    }, [enabled, onKeyDown, onKeyUp, onStop]);
 
     return pressed;
 }

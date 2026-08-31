@@ -4,20 +4,14 @@ import { useSerial } from './useSerial';
 const JOG_INTERVAL_MS = 100;
 const MAX_UNACKED = 2; // simple flow-control cap
 
-type Axis = 'X' | 'Y' | 'Z';
+export type Axis = 'X' | 'Y' | 'Z';
+export type Direction = 1 | -1;
 
-const KEY_TO_AXIS: Record<string, { axis: Axis; sign: 1 | -1 }> = {
-    KeyD: { axis: 'X', sign: 1 },
-    KeyA: { axis: 'X', sign: -1 },
-    KeyW: { axis: 'Y', sign: 1 },
-    KeyS: { axis: 'Y', sign: -1 },
-    ArrowUp: { axis: 'Z', sign: 1 },
-    ArrowDown: { axis: 'Z', sign: -1 },
-};
+const AXES: Axis[] = ['X', 'Y', 'Z'];
 
 export function useJogControl(feedRate: number) {
     const { sendGcode, connected } = useSerial();
-    const heldKeys = useRef<Set<string>>(new Set());
+    const activeMoves = useRef<Map<Axis, Set<Direction>>>(new Map());
     const unacked = useRef(0);
     const relativeModeSet = useRef(false);
     const feedRateRef = useRef(feedRate);
@@ -37,32 +31,29 @@ export function useJogControl(feedRate: number) {
         if (!connected) return;
 
         const interval = setInterval(async () => {
-            if (heldKeys.current.size === 0) return;
+            if (activeMoves.current.size === 0) return;
             if (unacked.current >= MAX_UNACKED) return; // back off if backed up
 
-            let dx = 0;
-            let dy = 0;
-            let dz = 0;
             const currentFeedRate = feedRateRef.current;
             const distancePerPulse =
                 currentFeedRate * (JOG_INTERVAL_MS / 60000);
 
-            for (const key of heldKeys.current) {
-                const mapping = KEY_TO_AXIS[key];
-                if (!mapping) continue;
-                if (mapping.axis === 'X') dx += mapping.sign * distancePerPulse;
-                if (mapping.axis === 'Y') dy += mapping.sign * distancePerPulse;
-                if (mapping.axis === 'Z') dz += mapping.sign * distancePerPulse;
+            const delta: Record<Axis, number> = { X: 0, Y: 0, Z: 0 };
+            for (const [axis, directions] of activeMoves.current) {
+                for (const direction of directions) {
+                    delta[axis] += direction * distancePerPulse;
+                }
             }
 
-            if (dx === 0 && dy === 0 && dz === 0) return;
+            if (delta.X === 0 && delta.Y === 0 && delta.Z === 0) return;
 
             await ensureRelativeMode();
             unacked.current += 1;
             const parts = ['G1'];
-            if (dx !== 0) parts.push(`X${dx.toFixed(3)}`);
-            if (dy !== 0) parts.push(`Y${dy.toFixed(3)}`);
-            if (dz !== 0) parts.push(`Z${dz.toFixed(3)}`);
+            for (const axis of AXES) {
+                if (delta[axis] !== 0)
+                    parts.push(`${axis}${delta[axis].toFixed(3)}`);
+            }
             parts.push(`F${currentFeedRate}`);
             await sendGcode(parts.join(' '));
             unacked.current = Math.max(0, unacked.current - 1); // decrement once write completes
@@ -71,26 +62,30 @@ export function useJogControl(feedRate: number) {
         return () => clearInterval(interval);
     }, [connected, sendGcode, ensureRelativeMode]);
 
-    // clear held keys once the connection drops so a stale key doesn't jog on reconnect
+    // clear active moves once the connection drops so a stale move doesn't jog on reconnect
     useEffect(() => {
-        if (!connected) heldKeys.current.clear();
+        if (!connected) activeMoves.current.clear();
     }, [connected]);
 
-    const keyDown = useCallback((key: string) => {
-        if (!(key in KEY_TO_AXIS)) return false;
-        heldKeys.current.add(key);
-        return true;
+    const startMove = useCallback((axis: Axis, direction: Direction) => {
+        let directions = activeMoves.current.get(axis);
+        if (!directions) {
+            directions = new Set();
+            activeMoves.current.set(axis, directions);
+        }
+        directions.add(direction);
     }, []);
 
-    const keyUp = useCallback((key: string) => {
-        if (!(key in KEY_TO_AXIS)) return false;
-        heldKeys.current.delete(key);
-        return true;
+    const stopMove = useCallback((axis: Axis, direction: Direction) => {
+        const directions = activeMoves.current.get(axis);
+        if (!directions) return;
+        directions.delete(direction);
+        if (directions.size === 0) activeMoves.current.delete(axis);
     }, []);
 
-    const clearKeys = useCallback(() => {
-        heldKeys.current.clear();
+    const cancelAll = useCallback(() => {
+        activeMoves.current.clear();
     }, []);
 
-    return { connected, keyDown, keyUp, clearKeys };
+    return { connected, startMove, stopMove, cancelAll };
 }
