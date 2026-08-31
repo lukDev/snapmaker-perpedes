@@ -8,7 +8,7 @@ export default function StopPanel({
     connected: boolean;
 }): ReactNode {
     return (
-        <div className="w-full rounded-2xl border border-slate-200 bg-white p-4 shadow-xl">
+        <div className="w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
             <div
                 className={`transition-opacity ${
                     connected ? '' : 'pointer-events-none opacity-40'
