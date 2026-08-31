@@ -11,7 +11,7 @@ function ControlPanels(): ReactNode {
 
     return (
         <div className="flex flex-col items-center gap-6">
-            <div className="flex items-center gap-6">
+            <div className="flex items-stretch gap-6">
                 <JogPanel
                     connected={connected}
                     feedRate={feedRate}

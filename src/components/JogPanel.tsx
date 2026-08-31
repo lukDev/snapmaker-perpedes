@@ -31,7 +31,7 @@ function Key({
 }): ReactNode {
     return (
         <div
-            className={`flex flex-col h-16 w-16 items-center justify-center rounded-xl border-2 text-2xl font-semibold transition-all duration-75 select-none ${
+            className={`flex h-16 w-16 flex-col items-center justify-center rounded-xl border-2 text-2xl font-semibold transition-all duration-75 select-none ${
                 active
                     ? 'scale-95 border-emerald-500 bg-emerald-400 text-emerald-950 shadow-[0_0_20px_rgba(52,211,153,0.5)]'
                     : 'border-slate-300 bg-white text-slate-600 shadow-sm'

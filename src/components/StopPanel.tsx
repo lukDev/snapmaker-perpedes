@@ -14,7 +14,7 @@ export default function StopPanel({
                     connected ? '' : 'pointer-events-none opacity-40'
                 }`}>
                 <div
-                    className={`flex flex-col py-3 w-full items-center justify-center rounded-xl border-2 text-2xl font-bold tracking-wide transition-all duration-75 select-none ${
+                    className={`flex w-full flex-col items-center justify-center rounded-xl border-2 py-3 text-2xl font-bold tracking-wide transition-all duration-75 select-none ${
                         active
                             ? 'scale-99 border-red-600 bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.5)]'
                             : 'border-red-300 bg-red-50 text-red-600 shadow-sm'
