@@ -10,7 +10,7 @@ export type Direction = 1 | -1;
 const AXES: Axis[] = ['X', 'Y', 'Z'];
 
 export function useJogControl(feedRate: number) {
-    const { sendGcode, connected } = useSerial();
+    const { sendGcode, connected, homed } = useSerial();
     const activeMoves = useRef<Map<Axis, Set<Direction>>>(new Map());
     const unacked = useRef(0);
     const relativeModeSet = useRef(false);
@@ -28,7 +28,7 @@ export function useJogControl(feedRate: number) {
 
     // main pulse loop
     useEffect(() => {
-        if (!connected) return;
+        if (!connected || !homed) return;
 
         const interval = setInterval(async () => {
             if (activeMoves.current.size === 0) return;
@@ -74,12 +74,12 @@ export function useJogControl(feedRate: number) {
         }, JOG_INTERVAL_MS);
 
         return () => clearInterval(interval);
-    }, [connected, sendGcode, ensureRelativeMode]);
+    }, [connected, homed, sendGcode, ensureRelativeMode]);
 
     // clear active moves once the connection drops so a stale move doesn't jog on reconnect
     useEffect(() => {
-        if (!connected) activeMoves.current.clear();
-    }, [connected]);
+        if (!connected || !homed) activeMoves.current.clear();
+    }, [connected, homed]);
 
     const startMove = useCallback((axis: Axis, direction: Direction) => {
         let directions = activeMoves.current.get(axis);

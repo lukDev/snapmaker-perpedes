@@ -7,20 +7,24 @@ import { SerialProvider } from './context/SerialContext.tsx';
 import { useJogPanel } from './hooks/useJogPanel.ts';
 
 function ControlPanels(): ReactNode {
-    const { connected, feedRate, setFeedRate, pressed } = useJogPanel();
+    const { connected, homed, feedRate, setFeedRate, pressed } = useJogPanel();
 
     return (
         <div className="flex flex-col items-center gap-6">
             <div className="flex items-stretch gap-6">
                 <JogPanel
                     connected={connected}
+                    homed={homed}
                     feedRate={feedRate}
                     setFeedRate={setFeedRate}
                     pressed={pressed}
                 />
                 <SpindlePanel />
             </div>
-            <StopPanel connected={connected} active={pressed.has('Space')} />
+            <StopPanel
+                connected={connected && homed}
+                active={pressed.has('Space')}
+            />
         </div>
     );
 }

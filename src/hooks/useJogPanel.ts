@@ -17,7 +17,8 @@ const KEY_TO_AXIS: Partial<
 };
 
 export function useJogPanel() {
-    const { connected } = useSerial();
+    const { connected, homed } = useSerial();
+    const ready = connected && homed;
     const [feedRate, setFeedRate] = useState(DEFAULT_FEED_RATE);
     const { startMove, stopMove, cancelAll } = useJogControl(feedRate);
 
@@ -37,7 +38,7 @@ export function useJogPanel() {
         [stopMove]
     );
 
-    const pressed = useTrackedKeys(connected, onKeyDown, onKeyUp, cancelAll);
+    const pressed = useTrackedKeys(ready, onKeyDown, onKeyUp, cancelAll);
 
-    return { connected, feedRate, setFeedRate, pressed };
+    return { connected, homed, feedRate, setFeedRate, pressed };
 }

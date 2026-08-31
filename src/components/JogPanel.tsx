@@ -44,15 +44,18 @@ function Key({
 
 export default function JogPanel({
     connected,
+    homed,
     feedRate,
     setFeedRate,
     pressed,
 }: {
     connected: boolean;
+    homed: boolean;
     feedRate: number;
     setFeedRate: (feedRate: number) => void;
     pressed: Set<TrackedKey>;
 }): ReactNode {
+    const ready = connected && homed;
     return (
         <div className="relative flex flex-col items-center gap-6 rounded-2xl border border-slate-200 bg-white p-10 shadow-xl">
             <div className="absolute top-4 right-4">
@@ -60,7 +63,7 @@ export default function JogPanel({
             </div>
             <div
                 className={`flex items-center gap-10 transition-opacity ${
-                    connected ? '' : 'pointer-events-none opacity-40'
+                    ready ? '' : 'pointer-events-none opacity-40'
                 }`}>
                 <div className="flex flex-col items-center gap-2">
                     <Key code="KeyW" active={pressed.has('KeyW')} />
@@ -82,6 +85,11 @@ export default function JogPanel({
             {!connected && (
                 <p className="text-sm text-slate-400">
                     Connect to the machine to enable jog controls.
+                </p>
+            )}
+            {connected && !homed && (
+                <p className="text-sm text-slate-400">
+                    Home the machine to enable jog controls.
                 </p>
             )}
         </div>

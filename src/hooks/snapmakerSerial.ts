@@ -6,7 +6,9 @@ export function useSnapmakerSerial() {
     const readerRef = useRef<ReadableStreamDefaultReader<string> | null>(null);
     const writableClosedRef = useRef<Promise<void> | null>(null);
     const readableClosedRef = useRef<Promise<void> | null>(null);
+    const ackQueueRef = useRef<Array<() => void>>([]);
     const [connected, setConnected] = useState(false);
+    const [homed, setHomed] = useState(false);
     const [log, setLog] = useState<string[]>([]);
 
     const appendLog = (line: string) =>
@@ -49,6 +51,7 @@ export function useSnapmakerSerial() {
             readerRef.current = reader;
 
             setConnected(true);
+            setHomed(false);
 
             // background read loop
             (async () => {
@@ -56,7 +59,12 @@ export function useSnapmakerSerial() {
                     while (true) {
                         const { value, done } = await reader.read();
                         if (done) break;
-                        if (value) appendLog(`<< ${value}`);
+                        if (value) {
+                            appendLog(`<< ${value}`);
+                            if (/^ok\b/i.test(value)) {
+                                ackQueueRef.current.shift()?.();
+                            }
+                        }
                     }
                 } catch (err) {
                     appendLog(`Read error: ${String(err)}`);
@@ -73,6 +81,16 @@ export function useSnapmakerSerial() {
         appendLog(`>> ${line}`);
         await writerRef.current.write(line + '\n');
     }, []);
+
+    const home = useCallback(async () => {
+        if (!writerRef.current) return;
+        const acked = new Promise<void>(resolve => {
+            ackQueueRef.current.push(resolve);
+        });
+        await sendGcode('G28 O'); // O: skip homing if already homed
+        await acked;
+        setHomed(true);
+    }, [sendGcode]);
 
     const disconnect = useCallback(async () => {
         try {
@@ -91,11 +109,13 @@ export function useSnapmakerSerial() {
             readerRef.current = null;
             writableClosedRef.current = null;
             readableClosedRef.current = null;
+            ackQueueRef.current = [];
             setConnected(false);
+            setHomed(false);
         }
     }, []);
 
-    return { connect, disconnect, sendGcode, connected, log };
+    return { connect, disconnect, sendGcode, home, connected, homed, log };
 }
 
 // Splits an incoming text stream into discrete lines (Snapmaker responds line-by-line)
