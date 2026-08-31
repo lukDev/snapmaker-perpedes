@@ -1,7 +1,29 @@
 import type { ReactNode } from 'react';
-import KeyPanel from './components/KeyPanel.tsx';
+import JogPanel from './components/JogPanel.tsx';
+import SpindlePanel from './components/SpindlePanel.tsx';
+import StopPanel from './components/StopPanel.tsx';
 import ConnectionStatus from './components/ConnectionStatus.tsx';
 import { SerialProvider } from './context/SerialContext.tsx';
+import { useJogPanel } from './hooks/useJogPanel.ts';
+
+function ControlPanels(): ReactNode {
+    const { connected, feedRate, setFeedRate, pressed } = useJogPanel();
+
+    return (
+        <div className="flex flex-col items-center gap-6">
+            <div className="flex items-center gap-6">
+                <JogPanel
+                    connected={connected}
+                    feedRate={feedRate}
+                    setFeedRate={setFeedRate}
+                    pressed={pressed}
+                />
+                <SpindlePanel />
+            </div>
+            <StopPanel connected={connected} active={pressed.has('Space')} />
+        </div>
+    );
+}
 
 export default function App(): ReactNode {
     return (
@@ -15,7 +37,7 @@ export default function App(): ReactNode {
                     <ConnectionStatus />
                 </header>
                 <div className="flex min-h-screen items-center justify-center pt-16">
-                    <KeyPanel />
+                    <ControlPanels />
                 </div>
             </div>
         </SerialProvider>
