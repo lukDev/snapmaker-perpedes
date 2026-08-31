@@ -38,14 +38,28 @@ export function useJogControl(feedRate: number) {
             const distancePerPulse =
                 currentFeedRate * (JOG_INTERVAL_MS / 60000);
 
-            const delta: Record<Axis, number> = { X: 0, Y: 0, Z: 0 };
+            const rawDelta: Record<Axis, number> = { X: 0, Y: 0, Z: 0 };
             for (const [axis, directions] of activeMoves.current) {
                 for (const direction of directions) {
-                    delta[axis] += direction * distancePerPulse;
+                    rawDelta[axis] += direction;
                 }
             }
 
-            if (delta.X === 0 && delta.Y === 0 && delta.Z === 0) return;
+            const magnitude = Math.sqrt(
+                rawDelta.X ** 2 + rawDelta.Y ** 2 + rawDelta.Z ** 2
+            );
+            if (magnitude === 0) return;
+
+            // scale so the combined vector always covers distancePerPulse,
+            // regardless of how many axes are active — otherwise a multi-axis
+            // move covers more ground than F implies and overruns the pulse
+            // interval, letting commands pile up in the machine's motion buffer
+            const scale = distancePerPulse / magnitude;
+            const delta: Record<Axis, number> = {
+                X: rawDelta.X * scale,
+                Y: rawDelta.Y * scale,
+                Z: rawDelta.Z * scale,
+            };
 
             await ensureRelativeMode();
             unacked.current += 1;

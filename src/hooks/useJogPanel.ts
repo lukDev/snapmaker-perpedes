@@ -5,7 +5,9 @@ import { useSerial } from './useSerial';
 
 const DEFAULT_FEED_RATE = 300;
 
-const KEY_TO_AXIS: Partial<Record<TrackedKey, { axis: Axis; direction: Direction }>> = {
+const KEY_TO_AXIS: Partial<
+    Record<TrackedKey, { axis: Axis; direction: Direction }>
+> = {
     KeyD: { axis: 'X', direction: 1 },
     KeyA: { axis: 'X', direction: -1 },
     KeyW: { axis: 'Y', direction: -1 },
