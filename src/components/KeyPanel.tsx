@@ -26,6 +26,16 @@ const LABELS: Record<TrackedKey, string> = {
     Space: 'STOP',
 };
 
+const KEY_NAMES: Record<TrackedKey, string> = {
+    KeyW: 'W',
+    KeyA: 'A',
+    KeyS: 'S',
+    KeyD: 'D',
+    ArrowUp: 'Up',
+    ArrowDown: 'Down',
+    Space: 'Space',
+};
+
 function useTrackedKeys(
     enabled: boolean,
     onKeyDown: (code: TrackedKey) => void,
@@ -111,12 +121,13 @@ function Key({
 }): ReactNode {
     return (
         <div
-            className={`flex h-16 w-16 items-center justify-center rounded-xl border-2 text-2xl font-semibold transition-all duration-75 select-none ${
+            className={`flex flex-col h-16 w-16 items-center justify-center rounded-xl border-2 text-2xl font-semibold transition-all duration-75 select-none ${
                 active
                     ? 'scale-95 border-emerald-500 bg-emerald-400 text-emerald-950 shadow-[0_0_20px_rgba(52,211,153,0.5)]'
                     : 'border-slate-300 bg-white text-slate-600 shadow-sm'
             }`}>
             {LABELS[code]}
+            <div className="text-xs text-slate-400">{KEY_NAMES[code]}</div>
         </div>
     );
 }
@@ -124,12 +135,13 @@ function Key({
 function StopKey({ active }: { active: boolean }): ReactNode {
     return (
         <div
-            className={`flex h-16 w-full items-center justify-center rounded-xl border-2 text-2xl font-bold tracking-wide transition-all duration-75 select-none ${
+            className={`flex flex-col h-16 w-full items-center justify-center rounded-xl border-2 text-2xl font-bold tracking-wide transition-all duration-75 select-none ${
                 active
                     ? 'scale-95 border-red-600 bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.5)]'
                     : 'border-red-300 bg-red-50 text-red-600 shadow-sm'
             }`}>
             {LABELS.Space}
+            <div className={`text-xs ${active ? 'text-white' : 'text-slate-400'}`}>{KEY_NAMES.Space}</div>
         </div>
     );
 }
