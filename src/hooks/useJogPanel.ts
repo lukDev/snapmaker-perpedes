@@ -8,8 +8,8 @@ const DEFAULT_FEED_RATE = 300;
 const KEY_TO_AXIS: Partial<Record<TrackedKey, { axis: Axis; direction: Direction }>> = {
     KeyD: { axis: 'X', direction: 1 },
     KeyA: { axis: 'X', direction: -1 },
-    KeyW: { axis: 'Y', direction: 1 },
-    KeyS: { axis: 'Y', direction: -1 },
+    KeyW: { axis: 'Y', direction: -1 },
+    KeyS: { axis: 'Y', direction: 1 },
     ArrowUp: { axis: 'Z', direction: 1 },
     ArrowDown: { axis: 'Z', direction: -1 },
 };

@@ -3,9 +3,9 @@ import FeedRateInput from './FeedRateInput';
 import type { TrackedKey } from '../hooks/useTrackedKeys';
 
 const LABELS: Record<TrackedKey, string> = {
-    KeyW: 'Y+',
+    KeyW: 'Y-',
     KeyA: 'X-',
-    KeyS: 'Y-',
+    KeyS: 'Y+',
     KeyD: 'X+',
     ArrowUp: 'Z+',
     ArrowDown: 'Z-',
