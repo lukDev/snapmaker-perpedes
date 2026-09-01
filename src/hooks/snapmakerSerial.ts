@@ -1,4 +1,19 @@
 import { useCallback, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
+
+export type Axis = 'X' | 'Y' | 'Z';
+export type AxisPosition = { x: number; y: number; z: number };
+
+const POSITION_REPORT_RE =
+    /^X:(-?\d+\.?\d*)\s+Y:(-?\d+\.?\d*)\s+Z:(-?\d+\.?\d*)/;
+
+const ZERO_POSITION: AxisPosition = { x: 0, y: 0, z: 0 };
+
+// Snapmaker's firmware doesn't implement M154 (position auto-report), so
+// position updates are obtained by polling M114 on an interval instead.
+const POSITION_POLL_INTERVAL_MS = 1000;
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export function useSnapmakerSerial() {
     const portRef = useRef<SerialPort | null>(null);
@@ -8,12 +23,43 @@ export function useSnapmakerSerial() {
     const readableClosedRef = useRef<Promise<void> | null>(null);
     const ackQueueRef = useRef<Array<() => void>>([]);
     const isDebugPortRef = useRef(false);
+    const positionPollActiveRef = useRef(false);
+    const workOffsetRef = useRef<AxisPosition>(ZERO_POSITION);
+    const workPositionRef = useRef<AxisPosition | null>(null);
     const [connected, setConnected] = useState(false);
     const [homed, setHomed] = useState(false);
     const [log, setLog] = useState<string[]>([]);
+    const [workPosition, setWorkPosition] = useState<AxisPosition | null>(null);
+    const [machinePosition, setMachinePosition] = useState<AxisPosition | null>(
+        null
+    );
 
     const appendLog = (line: string) =>
         setLog(prev => [...prev.slice(-199), line]); // keep last 200 lines
+
+    const applyPositionReport = (line: string) => {
+        const match = POSITION_REPORT_RE.exec(line);
+        if (!match) return;
+        const work: AxisPosition = {
+            x: parseFloat(match[1]),
+            y: parseFloat(match[2]),
+            z: parseFloat(match[3]),
+        };
+        const offset = workOffsetRef.current;
+        workPositionRef.current = work;
+        // Runs from the detached background read loop, outside any React
+        // event, so a plain setState can sit pending until something else
+        // (e.g. a click) forces a render. flushSync makes each report paint
+        // immediately.
+        flushSync(() => {
+            setWorkPosition(work);
+            setMachinePosition({
+                x: work.x + offset.x,
+                y: work.y + offset.y,
+                z: work.z + offset.z,
+            });
+        });
+    };
 
     const connect = useCallback(async () => {
         if (!('serial' in navigator)) {
@@ -58,6 +104,10 @@ export function useSnapmakerSerial() {
 
             setConnected(true);
             setHomed(false);
+            workOffsetRef.current = ZERO_POSITION;
+            workPositionRef.current = null;
+            setWorkPosition(null);
+            setMachinePosition(null);
 
             // background read loop
             (async () => {
@@ -70,6 +120,7 @@ export function useSnapmakerSerial() {
                             if (/^ok\b/i.test(value)) {
                                 ackQueueRef.current.shift()?.();
                             }
+                            applyPositionReport(value);
                         }
                     }
                 } catch (err) {
@@ -105,13 +156,53 @@ export function useSnapmakerSerial() {
         [sendGcode]
     );
 
+    const startPositionPolling = useCallback(() => {
+        if (positionPollActiveRef.current) return;
+        positionPollActiveRef.current = true;
+        (async () => {
+            while (positionPollActiveRef.current) {
+                await sendGcodeAndWaitForAck('M114');
+                await sleep(POSITION_POLL_INTERVAL_MS);
+            }
+        })();
+    }, [sendGcodeAndWaitForAck]);
+
     const home = useCallback(async () => {
         if (!writerRef.current) return;
         await sendGcodeAndWaitForAck('G28 O'); // O: skip homing if already homed
+        workOffsetRef.current = ZERO_POSITION;
         setHomed(true);
-    }, [sendGcodeAndWaitForAck]);
+        startPositionPolling();
+    }, [sendGcodeAndWaitForAck, startPositionPolling]);
+
+    const setWorkOrigin = useCallback(
+        async (axes: Axis[]) => {
+            const current = workPositionRef.current;
+            if (!writerRef.current || !current || axes.length === 0) return;
+
+            const offset = workOffsetRef.current;
+            const newOffset = { ...offset };
+            for (const axis of axes) {
+                const key = axis.toLowerCase() as keyof AxisPosition;
+                newOffset[key] = offset[key] + current[key];
+            }
+            workOffsetRef.current = newOffset;
+
+            const newWork = { ...current };
+            for (const axis of axes)
+                newWork[axis.toLowerCase() as keyof AxisPosition] = 0;
+            workPositionRef.current = newWork;
+            setWorkPosition(newWork);
+
+            await sendGcodeAndWaitForAck(
+                ['G92', ...axes.map(axis => `${axis}0`)].join(' ')
+            );
+        },
+        [sendGcodeAndWaitForAck]
+    );
 
     const disconnect = useCallback(async () => {
+        positionPollActiveRef.current = false;
         try {
             await readerRef.current?.cancel();
             await readableClosedRef.current?.catch(() => {});
@@ -130,12 +221,27 @@ export function useSnapmakerSerial() {
             readableClosedRef.current = null;
             ackQueueRef.current = [];
             isDebugPortRef.current = false;
+            workOffsetRef.current = ZERO_POSITION;
+            workPositionRef.current = null;
             setConnected(false);
             setHomed(false);
+            setWorkPosition(null);
+            setMachinePosition(null);
         }
     }, []);
 
-    return { connect, disconnect, sendGcode, home, connected, homed, log };
+    return {
+        connect,
+        disconnect,
+        sendGcode,
+        home,
+        setWorkOrigin,
+        connected,
+        homed,
+        log,
+        workPosition,
+        machinePosition,
+    };
 }
 
 // Splits an incoming text stream into discrete lines (Snapmaker responds line-by-line)
