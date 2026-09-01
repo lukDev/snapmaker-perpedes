@@ -1,8 +1,8 @@
-import { useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import { useSerial } from '../hooks/useSerial';
 
-const MIN_SPINDLE_SPEED_RPM = 1;
+const MIN_SPINDLE_SPEED_RPM = 8000;
 const MAX_SPINDLE_SPEED_RPM = 18000;
-const DEFAULT_SPINDLE_SPEED_RPM = 12000;
 
 function SpeedControl({
     value,
@@ -83,13 +83,16 @@ function OnOffSwitch({
 }
 
 export default function SpindlePanel(): ReactNode {
-    const [speed, setSpeed] = useState(DEFAULT_SPINDLE_SPEED_RPM);
-    const [on, setOn] = useState(false);
+    const { spindleOn, spindleSpeed, setSpindleOn, setSpindleSpeed } =
+        useSerial();
 
     return (
         <div className="flex flex-1 flex-col items-center justify-center gap-12 rounded-2xl border border-slate-200 bg-white p-10 shadow-xl">
-            <SpeedControl value={speed} onChange={setSpeed} />
-            <OnOffSwitch on={on} onToggle={() => setOn(prev => !prev)} />
+            <SpeedControl value={spindleSpeed} onChange={setSpindleSpeed} />
+            <OnOffSwitch
+                on={spindleOn}
+                onToggle={() => setSpindleOn(!spindleOn)}
+            />
         </div>
     );
 }

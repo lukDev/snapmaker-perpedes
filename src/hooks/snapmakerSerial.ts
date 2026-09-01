@@ -13,6 +13,12 @@ const ZERO_POSITION: AxisPosition = { x: 0, y: 0, z: 0 };
 // position updates are obtained by polling M114 on an interval instead.
 const POSITION_POLL_INTERVAL_MS = 1000;
 
+export const DEFAULT_SPINDLE_SPEED_RPM = 12000;
+
+// Debounce spindle RPM changes while the slider is being dragged, so we
+// don't flood the machine with an M3 for every intermediate value.
+const SPINDLE_RPM_DEBOUNCE_MS = 1000;
+
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export function useSnapmakerSerial() {
@@ -26,12 +32,21 @@ export function useSnapmakerSerial() {
     const positionPollActiveRef = useRef(false);
     const workOffsetRef = useRef<AxisPosition>(ZERO_POSITION);
     const workPositionRef = useRef<AxisPosition | null>(null);
+    const spindleOnRef = useRef(false);
+    const spindleSpeedRef = useRef(DEFAULT_SPINDLE_SPEED_RPM);
+    const spindleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(
+        null
+    );
     const [connected, setConnected] = useState(false);
     const [homed, setHomed] = useState(false);
     const [log, setLog] = useState<string[]>([]);
     const [workPosition, setWorkPosition] = useState<AxisPosition | null>(null);
     const [machinePosition, setMachinePosition] = useState<AxisPosition | null>(
         null
+    );
+    const [spindleOn, setSpindleOnState] = useState(false);
+    const [spindleSpeed, setSpindleSpeedState] = useState(
+        DEFAULT_SPINDLE_SPEED_RPM
     );
 
     const appendLog = (line: string) =>
@@ -108,6 +123,10 @@ export function useSnapmakerSerial() {
             workPositionRef.current = null;
             setWorkPosition(null);
             setMachinePosition(null);
+            spindleOnRef.current = false;
+            setSpindleOnState(false);
+            clearSpindleDebounce();
+            await sendGcode('M5');
 
             // background read loop
             (async () => {
@@ -138,6 +157,37 @@ export function useSnapmakerSerial() {
         appendLog(`>> ${line}`);
         await writerRef.current.write(line + '\n');
     }, []);
+
+    const clearSpindleDebounce = () => {
+        if (spindleDebounceRef.current !== null) {
+            clearTimeout(spindleDebounceRef.current);
+            spindleDebounceRef.current = null;
+        }
+    };
+
+    const setSpindleOn = useCallback(
+        (on: boolean) => {
+            spindleOnRef.current = on;
+            setSpindleOnState(on);
+            clearSpindleDebounce();
+            void sendGcode(on ? `M3 S${spindleSpeedRef.current}` : 'M5');
+        },
+        [sendGcode]
+    );
+
+    const setSpindleSpeed = useCallback(
+        (rpm: number) => {
+            spindleSpeedRef.current = rpm;
+            setSpindleSpeedState(rpm);
+            clearSpindleDebounce();
+            if (!spindleOnRef.current) return;
+            spindleDebounceRef.current = setTimeout(() => {
+                spindleDebounceRef.current = null;
+                void sendGcode(`M3 S${spindleSpeedRef.current}`);
+            }, SPINDLE_RPM_DEBOUNCE_MS);
+        },
+        [sendGcode]
+    );
 
     const sendGcodeAndWaitForAck = useCallback(
         async (line: string) => {
@@ -223,10 +273,13 @@ export function useSnapmakerSerial() {
             isDebugPortRef.current = false;
             workOffsetRef.current = ZERO_POSITION;
             workPositionRef.current = null;
+            clearSpindleDebounce();
+            spindleOnRef.current = false;
             setConnected(false);
             setHomed(false);
             setWorkPosition(null);
             setMachinePosition(null);
+            setSpindleOnState(false);
         }
     }, []);
 
@@ -241,6 +294,10 @@ export function useSnapmakerSerial() {
         log,
         workPosition,
         machinePosition,
+        spindleOn,
+        spindleSpeed,
+        setSpindleOn,
+        setSpindleSpeed,
     };
 }
 

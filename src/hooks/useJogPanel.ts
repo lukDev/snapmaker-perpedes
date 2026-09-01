@@ -17,11 +17,22 @@ const KEY_TO_AXIS: Partial<
 };
 
 export function useJogPanel() {
-    const { connected, homed, workPosition, machinePosition, setWorkOrigin } =
-        useSerial();
+    const {
+        connected,
+        homed,
+        workPosition,
+        machinePosition,
+        setWorkOrigin,
+        setSpindleOn,
+    } = useSerial();
     const ready = connected && homed;
     const [feedRate, setFeedRate] = useState(DEFAULT_FEED_RATE);
     const { startMove, stopMove, cancelAll } = useJogControl(feedRate);
+
+    const stopAll = useCallback(() => {
+        cancelAll();
+        setSpindleOn(false);
+    }, [cancelAll, setSpindleOn]);
 
     const onKeyDown = useCallback(
         (code: TrackedKey) => {
@@ -39,7 +50,7 @@ export function useJogPanel() {
         [stopMove]
     );
 
-    const pressed = useTrackedKeys(ready, onKeyDown, onKeyUp, cancelAll);
+    const pressed = useTrackedKeys(ready, onKeyDown, onKeyUp, stopAll);
 
     return {
         connected,
