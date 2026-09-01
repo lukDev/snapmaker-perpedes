@@ -19,6 +19,12 @@ export const DEFAULT_SPINDLE_SPEED_RPM = 12000;
 // don't flood the machine with an M3 for every intermediate value.
 const SPINDLE_RPM_DEBOUNCE_MS = 1000;
 
+export const SUPPORTED_SPINDLE_TOOLHEAD = '200W CNC';
+
+// M1006's response starts with a "Tool Head: <name>" line, followed by
+// several detail lines we don't care about, then "ok".
+const TOOL_HEAD_LINE_RE = /^Tool Head:\s*(.+)$/i;
+
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export function useSnapmakerSerial() {
@@ -37,6 +43,7 @@ export function useSnapmakerSerial() {
     const spindleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(
         null
     );
+    const toolheadCaptureRef = useRef<string[] | null>(null);
     const [connected, setConnected] = useState(false);
     const [homed, setHomed] = useState(false);
     const [log, setLog] = useState<string[]>([]);
@@ -48,6 +55,8 @@ export function useSnapmakerSerial() {
     const [spindleSpeed, setSpindleSpeedState] = useState(
         DEFAULT_SPINDLE_SPEED_RPM
     );
+    const [toolhead, setToolhead] = useState<string | null>(null);
+    const spindleSupported = toolhead === SUPPORTED_SPINDLE_TOOLHEAD;
 
     const appendLog = (line: string) =>
         setLog(prev => [...prev.slice(-199), line]); // keep last 200 lines
@@ -75,82 +84,6 @@ export function useSnapmakerSerial() {
             });
         });
     };
-
-    const connect = useCallback(async () => {
-        if (!('serial' in navigator)) {
-            appendLog('Web Serial API not supported in this browser.');
-            return;
-        }
-
-        if (portRef.current) return;
-
-        try {
-            const port = await navigator.serial.requestPort();
-            await port.open({ baudRate: 115200 });
-            portRef.current = port;
-
-            if (!port.writable || !port.readable) {
-                throw new Error('Serial port is not readable/writable.');
-            }
-
-            // Ports without USB vendor/product info (e.g. macOS's cu.debug-console)
-            // aren't a real Snapmaker, so simulate instant acks for testing without hardware.
-            const info = port.getInfo();
-            isDebugPortRef.current = !info.usbVendorId && !info.usbProductId;
-
-            // --- writer ---
-            const textEncoder = new TextEncoderStream();
-            writableClosedRef.current = textEncoder.readable.pipeTo(
-                port.writable as unknown as WritableStream<Uint8Array>
-            );
-            writerRef.current = textEncoder.writable.getWriter();
-
-            // --- reader (decode incoming bytes as text, split into lines) ---
-            const textDecoder = new TextDecoderStream();
-            readableClosedRef.current = (
-                port.readable as unknown as ReadableStream<Uint8Array>
-            ).pipeTo(
-                textDecoder.writable as unknown as WritableStream<Uint8Array>
-            );
-            const lineStream =
-                textDecoder.readable.pipeThrough(makeLineSplitter());
-            const reader = lineStream.getReader();
-            readerRef.current = reader;
-
-            setConnected(true);
-            setHomed(false);
-            workOffsetRef.current = ZERO_POSITION;
-            workPositionRef.current = null;
-            setWorkPosition(null);
-            setMachinePosition(null);
-            spindleOnRef.current = false;
-            setSpindleOnState(false);
-            clearSpindleDebounce();
-            await sendGcode('M5');
-
-            // background read loop
-            (async () => {
-                try {
-                    while (true) {
-                        const { value, done } = await reader.read();
-                        if (done) break;
-                        if (value) {
-                            appendLog(`<< ${value}`);
-                            if (/^ok\b/i.test(value)) {
-                                ackQueueRef.current.shift()?.();
-                            }
-                            applyPositionReport(value);
-                        }
-                    }
-                } catch (err) {
-                    appendLog(`Read error: ${String(err)}`);
-                }
-            })();
-        } catch (err) {
-            appendLog(`Connect error: ${String(err)}`);
-            portRef.current = null;
-        }
-    }, []);
 
     const sendGcode = useCallback(async (line: string) => {
         if (!writerRef.current) return;
@@ -205,6 +138,101 @@ export function useSnapmakerSerial() {
         },
         [sendGcode]
     );
+
+    const queryToolhead = useCallback(async () => {
+        if (isDebugPortRef.current) {
+            appendLog(
+                `<< Tool Head: ${SUPPORTED_SPINDLE_TOOLHEAD} (simulated, debug port)`
+            );
+            return SUPPORTED_SPINDLE_TOOLHEAD;
+        }
+        toolheadCaptureRef.current = [];
+        await sendGcodeAndWaitForAck('M1006');
+        const lines = toolheadCaptureRef.current;
+        toolheadCaptureRef.current = null;
+        const match = lines?.[0] ? TOOL_HEAD_LINE_RE.exec(lines[0]) : null;
+        return match?.[1]?.trim() ?? null;
+    }, [sendGcodeAndWaitForAck]);
+
+    const connect = useCallback(async () => {
+        if (!('serial' in navigator)) {
+            appendLog('Web Serial API not supported in this browser.');
+            return;
+        }
+
+        if (portRef.current) return;
+
+        try {
+            const port = await navigator.serial.requestPort();
+            await port.open({ baudRate: 115200 });
+            portRef.current = port;
+
+            if (!port.writable || !port.readable) {
+                throw new Error('Serial port is not readable/writable.');
+            }
+
+            // Ports without USB vendor/product info (e.g. macOS's cu.debug-console)
+            // aren't a real Snapmaker, so simulate instant acks for testing without hardware.
+            const info = port.getInfo();
+            isDebugPortRef.current = !info.usbVendorId && !info.usbProductId;
+
+            // --- writer ---
+            const textEncoder = new TextEncoderStream();
+            writableClosedRef.current = textEncoder.readable.pipeTo(
+                port.writable as unknown as WritableStream<Uint8Array>
+            );
+            writerRef.current = textEncoder.writable.getWriter();
+
+            // --- reader (decode incoming bytes as text, split into lines) ---
+            const textDecoder = new TextDecoderStream();
+            readableClosedRef.current = (
+                port.readable as unknown as ReadableStream<Uint8Array>
+            ).pipeTo(
+                textDecoder.writable as unknown as WritableStream<Uint8Array>
+            );
+            const lineStream =
+                textDecoder.readable.pipeThrough(makeLineSplitter());
+            const reader = lineStream.getReader();
+            readerRef.current = reader;
+
+            setConnected(true);
+            setHomed(false);
+            workOffsetRef.current = ZERO_POSITION;
+            workPositionRef.current = null;
+            setWorkPosition(null);
+            setMachinePosition(null);
+            spindleOnRef.current = false;
+            setSpindleOnState(false);
+            clearSpindleDebounce();
+
+            // background read loop
+            (async () => {
+                try {
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        if (value) {
+                            appendLog(`<< ${value}`);
+                            if (/^ok\b/i.test(value)) {
+                                ackQueueRef.current.shift()?.();
+                            } else {
+                                toolheadCaptureRef.current?.push(value);
+                            }
+                            applyPositionReport(value);
+                        }
+                    }
+                } catch (err) {
+                    appendLog(`Read error: ${String(err)}`);
+                }
+            })();
+
+            await sendGcode('M5');
+            setToolhead(await queryToolhead());
+        } catch (err) {
+            appendLog(`Connect error: ${String(err)}`);
+            portRef.current = null;
+        }
+    }, [sendGcode, queryToolhead]);
 
     const startPositionPolling = useCallback(() => {
         if (positionPollActiveRef.current) return;
@@ -275,11 +303,13 @@ export function useSnapmakerSerial() {
             workPositionRef.current = null;
             clearSpindleDebounce();
             spindleOnRef.current = false;
+            toolheadCaptureRef.current = null;
             setConnected(false);
             setHomed(false);
             setWorkPosition(null);
             setMachinePosition(null);
             setSpindleOnState(false);
+            setToolhead(null);
         }
     }, []);
 
@@ -298,6 +328,8 @@ export function useSnapmakerSerial() {
         spindleSpeed,
         setSpindleOn,
         setSpindleSpeed,
+        toolhead,
+        spindleSupported,
     };
 }
 
