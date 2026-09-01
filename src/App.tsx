@@ -3,6 +3,7 @@ import JogPanel from './components/JogPanel.tsx';
 import SpindlePanel from './components/SpindlePanel.tsx';
 import StopPanel from './components/StopPanel.tsx';
 import ConnectionStatus from './components/ConnectionStatus.tsx';
+import StatusBanner from './components/StatusBanner.tsx';
 import { SerialProvider } from './context/SerialContext.tsx';
 import { useJogPanel } from './hooks/useJogPanel.ts';
 
@@ -40,8 +41,13 @@ export default function App(): ReactNode {
                     </span>
                     <ConnectionStatus />
                 </header>
-                <div className="flex min-h-screen items-center justify-center pt-16">
-                    <ControlPanels />
+                <div className="flex min-h-screen flex-col items-center gap-6 px-6 pt-16 pb-6">
+                    <div className="pt-6">
+                        <StatusBanner />
+                    </div>
+                    <div className="flex flex-1 items-center justify-center">
+                        <ControlPanels />
+                    </div>
                 </div>
             </div>
         </SerialProvider>

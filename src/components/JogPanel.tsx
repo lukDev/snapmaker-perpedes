@@ -82,16 +82,6 @@ export default function JogPanel({
                     <Key code="ArrowDown" active={pressed.has('ArrowDown')} />
                 </div>
             </div>
-            {!connected && (
-                <p className="text-sm text-slate-400">
-                    Connect to the machine to enable jog controls.
-                </p>
-            )}
-            {connected && !homed && (
-                <p className="text-sm text-slate-400">
-                    Home the machine to enable jog controls.
-                </p>
-            )}
         </div>
     );
 }
