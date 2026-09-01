@@ -7,6 +7,7 @@ export function useSnapmakerSerial() {
     const writableClosedRef = useRef<Promise<void> | null>(null);
     const readableClosedRef = useRef<Promise<void> | null>(null);
     const ackQueueRef = useRef<Array<() => void>>([]);
+    const isDebugPortRef = useRef(false);
     const [connected, setConnected] = useState(false);
     const [homed, setHomed] = useState(false);
     const [log, setLog] = useState<string[]>([]);
@@ -30,6 +31,11 @@ export function useSnapmakerSerial() {
             if (!port.writable || !port.readable) {
                 throw new Error('Serial port is not readable/writable.');
             }
+
+            // Ports without USB vendor/product info (e.g. macOS's cu.debug-console)
+            // aren't a real Snapmaker, so simulate instant acks for testing without hardware.
+            const info = port.getInfo();
+            isDebugPortRef.current = !info.usbVendorId && !info.usbProductId;
 
             // --- writer ---
             const textEncoder = new TextEncoderStream();
@@ -82,15 +88,28 @@ export function useSnapmakerSerial() {
         await writerRef.current.write(line + '\n');
     }, []);
 
+    const sendGcodeAndWaitForAck = useCallback(
+        async (line: string) => {
+            if (!writerRef.current) return;
+            if (isDebugPortRef.current) {
+                await sendGcode(line);
+                appendLog('<< ok (simulated, debug port)');
+                return;
+            }
+            const acked = new Promise<void>(resolve => {
+                ackQueueRef.current.push(resolve);
+            });
+            await sendGcode(line);
+            await acked;
+        },
+        [sendGcode]
+    );
+
     const home = useCallback(async () => {
         if (!writerRef.current) return;
-        const acked = new Promise<void>(resolve => {
-            ackQueueRef.current.push(resolve);
-        });
-        await sendGcode('G28 O'); // O: skip homing if already homed
-        await acked;
+        await sendGcodeAndWaitForAck('G28 O'); // O: skip homing if already homed
         setHomed(true);
-    }, [sendGcode]);
+    }, [sendGcodeAndWaitForAck]);
 
     const disconnect = useCallback(async () => {
         try {
@@ -110,6 +129,7 @@ export function useSnapmakerSerial() {
             writableClosedRef.current = null;
             readableClosedRef.current = null;
             ackQueueRef.current = [];
+            isDebugPortRef.current = false;
             setConnected(false);
             setHomed(false);
         }
