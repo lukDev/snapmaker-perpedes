@@ -10,7 +10,7 @@ export type Direction = 1 | -1;
 const AXES: Axis[] = ['X', 'Y', 'Z'];
 
 export function useJogControl(feedRate: number) {
-    const { sendGcode, connected, homed } = useSerial();
+    const { sendGcodeAndWaitForAck, connected, homed } = useSerial();
     const activeMoves = useRef<Map<Axis, Set<Direction>>>(new Map());
     const unacked = useRef(0);
     const relativeModeSet = useRef(false);
@@ -21,10 +21,10 @@ export function useJogControl(feedRate: number) {
 
     const ensureRelativeMode = useCallback(async () => {
         if (!relativeModeSet.current) {
-            await sendGcode('G91');
+            await sendGcodeAndWaitForAck('G91');
             relativeModeSet.current = true;
         }
-    }, [sendGcode]);
+    }, [sendGcodeAndWaitForAck]);
 
     // main pulse loop
     useEffect(() => {
@@ -69,12 +69,12 @@ export function useJogControl(feedRate: number) {
                     parts.push(`${axis}${delta[axis].toFixed(3)}`);
             }
             parts.push(`F${currentFeedRate}`);
-            await sendGcode(parts.join(' '));
+            await sendGcodeAndWaitForAck(parts.join(' '));
             unacked.current = Math.max(0, unacked.current - 1); // decrement once write completes
         }, JOG_INTERVAL_MS);
 
         return () => clearInterval(interval);
-    }, [connected, homed, sendGcode, ensureRelativeMode]);
+    }, [connected, homed, sendGcodeAndWaitForAck, ensureRelativeMode]);
 
     // clear active moves once the connection drops so a stale move doesn't jog on reconnect
     useEffect(() => {

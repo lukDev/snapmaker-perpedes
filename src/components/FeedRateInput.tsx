@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
-const MIN = 10;
-const MAX = 1500;
+const STEPS = [10, 20, 50, 100, 200, 300, 500, 750, 1000, 1200, 1500];
+const MIN = STEPS[0];
+const MAX = STEPS[STEPS.length - 1];
 
 function round1(value: number): number {
     return Math.round(value * 10) / 10;
@@ -11,9 +12,16 @@ function clamp(value: number): number {
     return Math.min(MAX, Math.max(MIN, value));
 }
 
-function stepFor(value: number): number {
-    return Math.max(0.1, round1(value * 0.01));
+function nextStep(value: number, direction: 1 | -1): number {
+    if (direction < 0) {
+        const next = STEPS.find(step => step > value);
+        return next ?? MAX;
+    }
+    const prev = [...STEPS].reverse().find(step => step < value);
+    return prev ?? MIN;
 }
+
+const WHEEL_THRESHOLD = 80;
 
 export default function FeedRateInput({
     value,
@@ -25,10 +33,12 @@ export default function FeedRateInput({
     const [text, setText] = useState(value.toFixed(1));
     const [prevValue, setPrevValue] = useState(value);
     const inputRef = useRef<HTMLInputElement>(null);
+    const wheelAccumRef = useRef(0);
 
     if (value !== prevValue) {
         setPrevValue(value);
         setText(value.toFixed(1));
+        wheelAccumRef.current = 0;
     }
 
     const commit = (next: number) => {
@@ -41,8 +51,14 @@ export default function FeedRateInput({
 
         const onWheel = (e: WheelEvent) => {
             e.preventDefault();
-            const direction = e.deltaY < 0 ? -1 : 1;
-            onChange(round1(clamp(value + direction * stepFor(value))));
+            const accum = wheelAccumRef.current + e.deltaY;
+            if (Math.abs(accum) < WHEEL_THRESHOLD) {
+                wheelAccumRef.current = accum;
+                return;
+            }
+            wheelAccumRef.current = 0;
+            const direction = accum < 0 ? 1 : -1;
+            onChange(round1(clamp(nextStep(value, direction))));
         };
 
         el.addEventListener('wheel', onWheel, { passive: false });

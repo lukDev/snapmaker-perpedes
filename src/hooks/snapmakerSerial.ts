@@ -98,30 +98,6 @@ export function useSnapmakerSerial() {
         }
     };
 
-    const setSpindleOn = useCallback(
-        (on: boolean) => {
-            spindleOnRef.current = on;
-            setSpindleOnState(on);
-            clearSpindleDebounce();
-            void sendGcode(on ? `M3 S${spindleSpeedRef.current}` : 'M5');
-        },
-        [sendGcode]
-    );
-
-    const setSpindleSpeed = useCallback(
-        (rpm: number) => {
-            spindleSpeedRef.current = rpm;
-            setSpindleSpeedState(rpm);
-            clearSpindleDebounce();
-            if (!spindleOnRef.current) return;
-            spindleDebounceRef.current = setTimeout(() => {
-                spindleDebounceRef.current = null;
-                void sendGcode(`M3 S${spindleSpeedRef.current}`);
-            }, SPINDLE_RPM_DEBOUNCE_MS);
-        },
-        [sendGcode]
-    );
-
     const sendGcodeAndWaitForAck = useCallback(
         async (line: string) => {
             if (!writerRef.current) return;
@@ -137,6 +113,32 @@ export function useSnapmakerSerial() {
             await acked;
         },
         [sendGcode]
+    );
+
+    const setSpindleOn = useCallback(
+        async (on: boolean) => {
+            spindleOnRef.current = on;
+            setSpindleOnState(on);
+            clearSpindleDebounce();
+            await sendGcodeAndWaitForAck(
+                on ? `M3 S${spindleSpeedRef.current}` : 'M5'
+            );
+        },
+        [sendGcodeAndWaitForAck]
+    );
+
+    const setSpindleSpeed = useCallback(
+        (rpm: number) => {
+            spindleSpeedRef.current = rpm;
+            setSpindleSpeedState(rpm);
+            clearSpindleDebounce();
+            if (!spindleOnRef.current) return;
+            spindleDebounceRef.current = setTimeout(async () => {
+                spindleDebounceRef.current = null;
+                await sendGcodeAndWaitForAck(`M3 S${spindleSpeedRef.current}`);
+            }, SPINDLE_RPM_DEBOUNCE_MS);
+        },
+        [sendGcodeAndWaitForAck]
     );
 
     const queryToolhead = useCallback(async () => {
@@ -226,13 +228,13 @@ export function useSnapmakerSerial() {
                 }
             })();
 
-            await sendGcode('M5');
+            await sendGcodeAndWaitForAck('M5');
             setToolhead(await queryToolhead());
         } catch (err) {
             appendLog(`Connect error: ${String(err)}`);
             portRef.current = null;
         }
-    }, [sendGcode, queryToolhead]);
+    }, [sendGcodeAndWaitForAck, queryToolhead]);
 
     const startPositionPolling = useCallback(() => {
         if (positionPollActiveRef.current) return;
@@ -316,7 +318,7 @@ export function useSnapmakerSerial() {
     return {
         connect,
         disconnect,
-        sendGcode,
+        sendGcodeAndWaitForAck,
         home,
         setWorkOrigin,
         connected,
