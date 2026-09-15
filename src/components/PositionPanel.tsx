@@ -95,18 +95,18 @@ export default function PositionPanel({
                 <button
                     type="button"
                     disabled={originActionsDisabled}
-                    onClick={goToOrigin}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-100 disabled:pointer-events-none disabled:opacity-40">
-                    <PinIcon className="h-4 w-4" />
-                    Go to Origin
-                </button>
-                <button
-                    type="button"
-                    disabled={originActionsDisabled}
                     onClick={() => setWorkOrigin(AXES)}
                     className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-100 disabled:pointer-events-none disabled:opacity-40">
                     <CrosshairIcon className="h-4 w-4" />
                     Set Work Origin
+                </button>
+                <button
+                    type="button"
+                    disabled={originActionsDisabled}
+                    onClick={goToOrigin}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-100 disabled:pointer-events-none disabled:opacity-40">
+                    <PinIcon className="h-4 w-4" />
+                    Go to Origin
                 </button>
             </div>
         </div>

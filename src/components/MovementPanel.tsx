@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import FeedRateInput from './utils/FeedRateInput.tsx';
-import { WasdArrowGrid } from './utils/KeyBadge.tsx';
 import DiscreteJogControls from './modes/DiscreteJogControls.tsx';
 import DrillingControls from './modes/DrillingControls.tsx';
 import CircleControls from './modes/CircleControls.tsx';
@@ -11,13 +10,14 @@ import type { Axis, AxisPosition } from '../hooks/snapmakerSerial';
 import type { MovementMode } from '../hooks/useMovementPanel';
 import type { CircleOrigin } from '../hooks/circleControl';
 import type { DrillingStatus } from '../hooks/drillingControl';
+import ContinuousJogControls from './modes/ContinuousJogControls.tsx';
 
 const MODES: { mode: MovementMode; label: string }[] = [
     { mode: 'continuous', label: 'Continuous' },
     { mode: 'discrete', label: 'Discrete' },
-    { mode: 'drilling', label: 'Drilling' },
     { mode: 'circle', label: 'Circle' },
     { mode: 'scrolling', label: 'Scroll' },
+    { mode: 'drilling', label: 'Drilling' },
 ];
 
 function ModeTabs({
@@ -109,14 +109,12 @@ export default function MovementPanel({
 
             <div className="flex h-full flex-col items-center justify-center gap-8 overflow-y-auto p-10">
                 {mode === 'continuous' && (
-                    <div
-                        className={`transition-opacity ${ready ? '' : 'pointer-events-none opacity-40'}`}>
-                        <WasdArrowGrid pressed={pressed} />
-                        <FeedRateInput
-                            value={feedRate}
-                            onChange={setFeedRate}
-                        />
-                    </div>
+                    <ContinuousJogControls
+                        pressed={pressed}
+                        ready={ready}
+                        speed={feedRate}
+                        setSpeed={setFeedRate}
+                    />
                 )}
                 {mode === 'discrete' && (
                     <DiscreteJogControls
