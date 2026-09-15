@@ -27,31 +27,31 @@ function ControlPanels(): ReactNode {
     } = useMovementPanel();
 
     return (
-        <div className="flex flex-col items-center gap-6">
-            <div className="flex items-stretch gap-6">
-                <MovementPanel
-                    connected={connected}
-                    homed={homed}
-                    mode={mode}
-                    setMode={setMode}
-                    feedRate={feedRate}
-                    setFeedRate={setFeedRate}
-                    pressed={pressed}
-                    workPosition={workPosition}
-                    machinePosition={machinePosition}
-                    setWorkOrigin={setWorkOrigin}
-                    goToOrigin={goToOrigin}
-                    discrete={discrete}
-                    drilling={drilling}
-                    circle={circle}
-                    scrolling={scrolling}
-                />
-                <SpindlePanel />
-            </div>
-            <StopPanel
-                connected={connected && homed}
-                active={pressed.has('Space')}
+        <div className="flex h-full items-center gap-6">
+            <MovementPanel
+                connected={connected}
+                homed={homed}
+                mode={mode}
+                setMode={setMode}
+                feedRate={feedRate}
+                setFeedRate={setFeedRate}
+                pressed={pressed}
+                workPosition={workPosition}
+                machinePosition={machinePosition}
+                setWorkOrigin={setWorkOrigin}
+                goToOrigin={goToOrigin}
+                discrete={discrete}
+                drilling={drilling}
+                circle={circle}
+                scrolling={scrolling}
             />
+            <div className="flex flex-col items-stretch gap-6">
+                <SpindlePanel />
+                <StopPanel
+                    connected={connected && homed}
+                    active={pressed.has('Space')}
+                />
+            </div>
         </div>
     );
 }
@@ -59,21 +59,19 @@ function ControlPanels(): ReactNode {
 export default function App(): ReactNode {
     return (
         <SerialProvider>
-            <div className="min-h-screen bg-slate-100">
-                <header className="fixed top-0 right-0 left-0 z-10 flex h-16 items-center gap-3 border-b border-slate-200 bg-white px-6 shadow-sm">
-                    <img src="/icon_detail.svg" alt="" className="h-14 w-14" />
-                    <span className="text-lg font-semibold tracking-wide text-slate-700">
-                        Snapmaker Per Pedes
-                    </span>
-                    <ConnectionStatus />
-                </header>
-                <div className="flex min-h-screen flex-col items-center gap-6 px-6 pt-16 pb-6">
-                    <div className="pt-6">
-                        <StatusBanner />
-                    </div>
-                    <div className="flex flex-1 items-center justify-center">
-                        <ControlPanels />
-                    </div>
+            <header className="fixed top-0 right-0 left-0 z-10 flex h-16 items-center gap-3 border-b border-slate-200 bg-white px-6 shadow-sm">
+                <img src="/icon_detail.svg" alt="" className="h-14 w-14" />
+                <span className="text-lg font-semibold tracking-wide text-slate-700">
+                    Snapmaker Per Pedes
+                </span>
+                <ConnectionStatus />
+            </header>
+            <div className="fixed flex top-16 right-0 bottom-0 left-0 flex-col items-center gap-6 bg-slate-100">
+                <div className="absolute z-20 pt-6">
+                    <StatusBanner />
+                </div>
+                <div className="absolute flex h-full p-14 items-center justify-center">
+                    <ControlPanels />
                 </div>
             </div>
         </SerialProvider>

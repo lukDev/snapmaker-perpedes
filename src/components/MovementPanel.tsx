@@ -28,13 +28,14 @@ function ModeTabs({
     setMode: (mode: MovementMode) => void;
 }): ReactNode {
     return (
-        <div className="flex gap-1 rounded-full border border-slate-200 bg-slate-100 p-1">
+        <div className="w-full flex h-16 items-center justify-between gap-1 border border-slate-200 bg-slate-100 p-1">
+            <div />
             {MODES.map(({ mode: candidate, label }) => (
                 <button
                     key={candidate}
                     type="button"
                     onClick={() => setMode(candidate)}
-                    className={`rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
+                    className={`rounded-full cursor-pointer px-3 py-1.5 text-sm font-semibold transition-colors ${
                         mode === candidate
                             ? 'bg-white text-slate-700 shadow-sm'
                             : 'text-slate-500 hover:text-slate-700'
@@ -42,6 +43,7 @@ function ModeTabs({
                     {label}
                 </button>
             ))}
+            <div />
         </div>
     );
 }
@@ -102,22 +104,17 @@ export default function MovementPanel({
     };
 }): ReactNode {
     const ready = connected && homed;
-    const showFeedRate = mode === 'continuous' || mode === 'circle';
 
     return (
-        <div className="flex flex-col items-center gap-6 rounded-2xl border border-slate-200 bg-white p-10 shadow-xl">
-            <div className="flex w-full items-center justify-between gap-4">
-                <ModeTabs mode={mode} setMode={setMode} />
-                {showFeedRate && (
-                    <FeedRateInput value={feedRate} onChange={setFeedRate} />
-                )}
-            </div>
+        <div className="flex flex-col h-full items-center justify-between gap-8 rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
+            <ModeTabs mode={mode} setMode={setMode} />
 
-            <div className="flex min-h-52 items-center justify-center">
+            <div className="flex flex-col h-full items-center justify-center p-10 gap-8 overflow-y-auto">
                 {mode === 'continuous' && (
                     <div
                         className={`transition-opacity ${ready ? '' : 'pointer-events-none opacity-40'}`}>
                         <WasdArrowGrid pressed={pressed} />
+                        <FeedRateInput value={feedRate} onChange={setFeedRate} />
                     </div>
                 )}
                 {mode === 'discrete' && (
@@ -145,13 +142,16 @@ export default function MovementPanel({
                     />
                 )}
                 {mode === 'circle' && (
-                    <CircleControls
-                        pressed={pressed}
-                        ready={ready}
-                        workPosition={workPosition}
-                        origin={circle.origin}
-                        setOrigin={circle.setOrigin}
-                    />
+                    <>
+                        <CircleControls
+                            pressed={pressed}
+                            ready={ready}
+                            workPosition={workPosition}
+                            origin={circle.origin}
+                            setOrigin={circle.setOrigin}
+                        />
+                        <FeedRateInput value={feedRate} onChange={setFeedRate} />
+                    </>
                 )}
                 {mode === 'scrolling' && (
                     <ScrollingControls
@@ -163,17 +163,17 @@ export default function MovementPanel({
                         stopSignal={pressed.has('Space')}
                     />
                 )}
+
+                <div className="h-px w-full bg-slate-200" />
+
+                <PositionPanel
+                    ready={ready}
+                    workPosition={workPosition}
+                    machinePosition={machinePosition}
+                    setWorkOrigin={setWorkOrigin}
+                    goToOrigin={goToOrigin}
+                />
             </div>
-
-            <div className="h-px w-full bg-slate-200" />
-
-            <PositionPanel
-                ready={ready}
-                workPosition={workPosition}
-                machinePosition={machinePosition}
-                setWorkOrigin={setWorkOrigin}
-                goToOrigin={goToOrigin}
-            />
         </div>
     );
 }
