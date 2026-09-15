@@ -4,7 +4,7 @@ import { useSerial } from './useSerial';
 const PULSE_INTERVAL_MS = 100;
 const MAX_UNACKED = 2; // simple flow-control cap
 
-export type DrillingStatus = 'idle' | 'descending' | 'retracting';
+export type DrillingStatus = 'idle' | 'descending' | 'holding' | 'retracting';
 
 export function useDrillingControl(
     enabled: boolean,
@@ -41,14 +41,13 @@ export function useDrillingControl(
         setStatus(next);
     }, []);
 
-    // main pulse loop — descends to maxDepth then auto-retracts, or retracts
-    // early (from whatever depth was reached) once stop() is called
+    // main pulse loop — descends to at most maxDepth, retracts once stop() is called
     useEffect(() => {
         if (!enabled) return;
 
         const interval = setInterval(async () => {
             const phase = statusRef.current;
-            if (phase === 'idle') return;
+            if (phase === 'idle' || phase == 'holding') return;
             if (unackedRef.current >= MAX_UNACKED) return;
             const epoch = epochRef.current;
 
@@ -85,7 +84,7 @@ export function useDrillingControl(
                 phase === 'descending' &&
                 descendedRef.current >= maxDepthRef.current
             ) {
-                setStatusBoth('retracting');
+                setStatusBoth('holding');
             } else if (phase === 'retracting' && descendedRef.current <= 0) {
                 setStatusBoth('idle');
             }
@@ -109,7 +108,7 @@ export function useDrillingControl(
     }, [setStatusBoth]);
 
     const stop = useCallback(() => {
-        if (statusRef.current === 'descending') setStatusBoth('retracting');
+        setStatusBoth('retracting');
     }, [setStatusBoth]);
 
     // hard abort (global stop) — unlike stop(), skips the retract phase

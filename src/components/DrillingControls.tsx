@@ -8,6 +8,7 @@ import type { DrillingStatus } from '../hooks/drillingControl';
 const STATUS_LABEL: Record<DrillingStatus, string> = {
     idle: 'Idle',
     descending: 'Descending…',
+    holding: 'Holding…',
     retracting: 'Retracting…',
 };
 
