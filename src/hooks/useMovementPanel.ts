@@ -7,11 +7,7 @@ import { useTrackedKeys, type TrackedKey } from './useTrackedKeys';
 import { useSerial } from './useSerial';
 
 export type MovementMode =
-    | 'continuous'
-    | 'discrete'
-    | 'drilling'
-    | 'circle'
-    | 'scrolling';
+    'continuous' | 'discrete' | 'drilling' | 'circle' | 'scrolling';
 
 const DEFAULT_FEED_RATE = 300;
 const DEFAULT_DISCRETE_DISTANCE = 1;

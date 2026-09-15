@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
-import FeedRateInput from './FeedRateInput';
-import { WasdArrowGrid } from './KeyBadge';
-import DiscreteJogControls from './DiscreteJogControls';
-import DrillingControls from './DrillingControls';
-import CircleControls from './CircleControls';
-import ScrollingControls from './ScrollingControls';
+import FeedRateInput from './utils/FeedRateInput.tsx';
+import { WasdArrowGrid } from './utils/KeyBadge.tsx';
+import DiscreteJogControls from './modes/DiscreteJogControls.tsx';
+import DrillingControls from './modes/DrillingControls.tsx';
+import CircleControls from './modes/CircleControls.tsx';
+import ScrollingControls from './modes/ScrollingControls.tsx';
 import PositionPanel from './PositionPanel';
 import type { TrackedKey } from '../hooks/useTrackedKeys';
 import type { Axis, AxisPosition } from '../hooks/snapmakerSerial';
@@ -28,14 +28,14 @@ function ModeTabs({
     setMode: (mode: MovementMode) => void;
 }): ReactNode {
     return (
-        <div className="w-full flex h-16 items-center justify-between gap-1 border border-slate-200 bg-slate-100 p-1">
+        <div className="flex h-16 w-full items-center justify-between gap-1 border border-slate-200 bg-slate-100 p-1">
             <div />
             {MODES.map(({ mode: candidate, label }) => (
                 <button
                     key={candidate}
                     type="button"
                     onClick={() => setMode(candidate)}
-                    className={`rounded-full cursor-pointer px-3 py-1.5 text-sm font-semibold transition-colors ${
+                    className={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
                         mode === candidate
                             ? 'bg-white text-slate-700 shadow-sm'
                             : 'text-slate-500 hover:text-slate-700'
@@ -79,8 +79,6 @@ export default function MovementPanel({
     discrete: {
         distance: number;
         setDistance: (value: number) => void;
-        speed: number;
-        setSpeed: (value: number) => void;
     };
     drilling: {
         maxDepth: number;
@@ -106,15 +104,18 @@ export default function MovementPanel({
     const ready = connected && homed;
 
     return (
-        <div className="flex flex-col h-full items-center justify-between gap-8 rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
+        <div className="flex h-full flex-col items-center justify-between gap-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
             <ModeTabs mode={mode} setMode={setMode} />
 
-            <div className="flex flex-col h-full items-center justify-center p-10 gap-8 overflow-y-auto">
+            <div className="flex h-full flex-col items-center justify-center gap-8 overflow-y-auto p-10">
                 {mode === 'continuous' && (
                     <div
                         className={`transition-opacity ${ready ? '' : 'pointer-events-none opacity-40'}`}>
                         <WasdArrowGrid pressed={pressed} />
-                        <FeedRateInput value={feedRate} onChange={setFeedRate} />
+                        <FeedRateInput
+                            value={feedRate}
+                            onChange={setFeedRate}
+                        />
                     </div>
                 )}
                 {mode === 'discrete' && (
@@ -123,8 +124,8 @@ export default function MovementPanel({
                         ready={ready}
                         distance={discrete.distance}
                         setDistance={discrete.setDistance}
-                        speed={discrete.speed}
-                        setSpeed={discrete.setSpeed}
+                        speed={feedRate}
+                        setSpeed={setFeedRate}
                     />
                 )}
                 {mode === 'drilling' && (
@@ -150,7 +151,10 @@ export default function MovementPanel({
                             origin={circle.origin}
                             setOrigin={circle.setOrigin}
                         />
-                        <FeedRateInput value={feedRate} onChange={setFeedRate} />
+                        <FeedRateInput
+                            value={feedRate}
+                            onChange={setFeedRate}
+                        />
                     </>
                 )}
                 {mode === 'scrolling' && (

@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
-import { WasdArrowGrid } from './KeyBadge';
-import NumberField from './NumberField';
-import { MAX_FEED_RATE } from '../hooks/jogControl';
-import type { TrackedKey } from '../hooks/useTrackedKeys';
+import { WasdArrowGrid } from '../utils/KeyBadge.tsx';
+import NumberField from '../utils/NumberField.tsx';
+import type { TrackedKey } from '../../hooks/useTrackedKeys.ts';
+import FeedRateInput from '../utils/FeedRateInput.tsx';
 
 export default function DiscreteJogControls({
     pressed,
@@ -35,15 +35,7 @@ export default function DiscreteJogControls({
                     max={100}
                     decimals={2}
                 />
-                <NumberField
-                    label="Speed"
-                    value={speed}
-                    onChange={setSpeed}
-                    unit="mm/min"
-                    min={1}
-                    max={MAX_FEED_RATE}
-                    decimals={1}
-                />
+                <FeedRateInput value={speed} onChange={setSpeed} />
             </div>
         </div>
     );

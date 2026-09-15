@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { CrosshairIcon } from './KeyBadge';
+import { CrosshairIcon } from './utils/KeyBadge.tsx';
 import type { Axis, AxisPosition } from '../hooks/snapmakerSerial';
 
 const AXES: Axis[] = ['X', 'Y', 'Z'];

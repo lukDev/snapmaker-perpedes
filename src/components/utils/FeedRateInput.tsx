@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { MAX_FEED_RATE } from '../hooks/jogControl';
+import { MAX_FEED_RATE } from '../../hooks/jogControl.ts';
+import NamedUnitField from './NamedUnitField.tsx';
 
 const STEPS = [10, 20, 50, 100, 200, 300, 500, 750, 1000, 1200, MAX_FEED_RATE];
 const MIN = STEPS[0];
@@ -23,7 +24,7 @@ function nextStep(value: number, direction: 1 | -1): number {
 
 const WHEEL_THRESHOLD = 80;
 
-export default function FeedRateInput({
+function FeedRateNumberInput({
     value,
     onChange,
 }: {
@@ -79,9 +80,24 @@ export default function FeedRateInput({
                 onKeyDown={e => {
                     if (e.key === 'Enter') e.currentTarget.blur();
                 }}
-                className="w-16 rounded-md border border-slate-300 bg-white px-2 py-1 text-right text-slate-700 tabular-nums focus:border-emerald-400 focus:outline-none"
+                className="w-18 rounded-md border border-slate-300 bg-white px-2 py-1 text-right text-slate-700 tabular-nums focus:border-emerald-400 focus:outline-none"
             />
-            <span>mm/min</span>
         </div>
+    );
+}
+
+export default function FeedRateInput({
+    value,
+    onChange,
+}: {
+    value: number;
+    onChange: (value: number) => void;
+}): ReactNode {
+    return (
+        <NamedUnitField
+            label="Speed"
+            unit="mm/min"
+            input={<FeedRateNumberInput value={value} onChange={onChange} />}
+        />
     );
 }

@@ -66,11 +66,11 @@ export default function App(): ReactNode {
                 </span>
                 <ConnectionStatus />
             </header>
-            <div className="fixed flex top-16 right-0 bottom-0 left-0 flex-col items-center gap-6 bg-slate-100">
+            <div className="fixed top-16 right-0 bottom-0 left-0 flex flex-col items-center gap-6 bg-slate-100">
                 <div className="absolute z-20 pt-6">
                     <StatusBanner />
                 </div>
-                <div className="absolute flex h-full p-14 items-center justify-center">
+                <div className="absolute flex h-full items-center justify-center p-14">
                     <ControlPanels />
                 </div>
             </div>

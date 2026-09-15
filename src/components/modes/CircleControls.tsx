@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
-import { Key, WasdArrowGrid, CrosshairIcon } from './KeyBadge';
-import type { TrackedKey } from '../hooks/useTrackedKeys';
-import type { AxisPosition } from '../hooks/snapmakerSerial';
-import type { CircleOrigin } from '../hooks/circleControl';
+import { Key, WasdArrowGrid, CrosshairIcon } from '../utils/KeyBadge.tsx';
+import type { TrackedKey } from '../../hooks/useTrackedKeys.ts';
+import type { AxisPosition } from '../../hooks/snapmakerSerial.ts';
+import type { CircleOrigin } from '../../hooks/circleControl.ts';
 
 function formatRadius(
     origin: CircleOrigin | null,

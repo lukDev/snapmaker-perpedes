@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
-import { Key } from './KeyBadge';
-import NumberField from './NumberField';
-import { MAX_FEED_RATE } from '../hooks/jogControl';
-import type { TrackedKey } from '../hooks/useTrackedKeys';
-import type { DrillingStatus } from '../hooks/drillingControl';
+import { Key } from '../utils/KeyBadge.tsx';
+import NumberField from '../utils/NumberField.tsx';
+import { MAX_FEED_RATE } from '../../hooks/jogControl.ts';
+import type { TrackedKey } from '../../hooks/useTrackedKeys.ts';
+import type { DrillingStatus } from '../../hooks/drillingControl.ts';
 
 const STATUS_LABEL: Record<DrillingStatus, string> = {
     idle: 'Idle',

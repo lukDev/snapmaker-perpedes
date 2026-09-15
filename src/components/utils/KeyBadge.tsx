@@ -3,9 +3,13 @@ import {
     KEY_LABELS,
     KEY_NAMES,
     type TrackedKey,
-} from '../hooks/useTrackedKeys';
+} from '../../hooks/useTrackedKeys.ts';
 
-export function CrosshairIcon({ className }: { className?: string }): ReactNode {
+export function CrosshairIcon({
+    className,
+}: {
+    className?: string;
+}): ReactNode {
     return (
         <svg
             viewBox="0 0 24 24"

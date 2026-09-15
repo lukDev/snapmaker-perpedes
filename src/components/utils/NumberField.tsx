@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import NamedUnitField from './NamedUnitField.tsx';
 
 function clamp(value: number, min: number, max: number): number {
     return Math.min(max, Math.max(min, value));
@@ -34,9 +35,10 @@ export default function NumberField({
     };
 
     return (
-        <label className="flex items-center justify-between gap-3 text-sm text-slate-500">
-            <span>{label}</span>
-            <span className="flex items-center gap-1.5">
+        <NamedUnitField
+            label={label}
+            unit={unit}
+            input={
                 <input
                     type="text"
                     inputMode="decimal"
@@ -50,8 +52,7 @@ export default function NumberField({
                     }}
                     className="w-16 rounded-md border border-slate-300 bg-white px-2 py-1 text-right text-slate-700 tabular-nums focus:border-emerald-400 focus:outline-none"
                 />
-                <span className="text-slate-400">{unit}</span>
-            </span>
-        </label>
+            }
+        />
     );
 }

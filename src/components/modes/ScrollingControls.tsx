@@ -1,7 +1,7 @@
 import { useRef, type ReactNode } from 'react';
-import NumberField from './NumberField';
-import { useScrollJogControl } from '../hooks/scrollJogControl';
-import type { Axis } from '../hooks/jogControl';
+import NumberField from '../utils/NumberField.tsx';
+import { useScrollJogControl } from '../../hooks/scrollJogControl.ts';
+import type { Axis } from '../../hooks/jogControl.ts';
 
 const AXES: Axis[] = ['X', 'Y', 'Z'];
 
