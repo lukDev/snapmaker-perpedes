@@ -1,36 +1,50 @@
 import type { ReactNode } from 'react';
-import JogPanel from './components/JogPanel.tsx';
+import MovementPanel from './components/MovementPanel.tsx';
 import SpindlePanel from './components/SpindlePanel.tsx';
 import StopPanel from './components/StopPanel.tsx';
 import ConnectionStatus from './components/ConnectionStatus.tsx';
 import StatusBanner from './components/StatusBanner.tsx';
 import { SerialProvider } from './context/SerialContext.tsx';
-import { useJogPanel } from './hooks/useJogPanel.ts';
+import { useMovementPanel } from './hooks/useMovementPanel.ts';
 
 function ControlPanels(): ReactNode {
     const {
         connected,
         homed,
+        mode,
+        setMode,
         feedRate,
         setFeedRate,
         pressed,
         workPosition,
         machinePosition,
         setWorkOrigin,
-    } = useJogPanel();
+        goToOrigin,
+        discrete,
+        drilling,
+        circle,
+        scrolling,
+    } = useMovementPanel();
 
     return (
         <div className="flex flex-col items-center gap-6">
             <div className="flex items-stretch gap-6">
-                <JogPanel
+                <MovementPanel
                     connected={connected}
                     homed={homed}
+                    mode={mode}
+                    setMode={setMode}
                     feedRate={feedRate}
                     setFeedRate={setFeedRate}
                     pressed={pressed}
                     workPosition={workPosition}
                     machinePosition={machinePosition}
                     setWorkOrigin={setWorkOrigin}
+                    goToOrigin={goToOrigin}
+                    discrete={discrete}
+                    drilling={drilling}
+                    circle={circle}
+                    scrolling={scrolling}
                 />
                 <SpindlePanel />
             </div>

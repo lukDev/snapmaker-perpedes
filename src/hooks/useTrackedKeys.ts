@@ -5,11 +5,37 @@ export const TRACKED_KEYS = [
     'KeyA',
     'KeyS',
     'KeyD',
+    'KeyQ',
+    'KeyE',
     'ArrowUp',
     'ArrowDown',
     'Space',
 ] as const;
 export type TrackedKey = (typeof TRACKED_KEYS)[number];
+
+export const KEY_LABELS: Record<TrackedKey, string> = {
+    KeyW: 'Y-',
+    KeyA: 'X-',
+    KeyS: 'Y+',
+    KeyD: 'X+',
+    KeyQ: 'CCW',
+    KeyE: 'CW',
+    ArrowUp: 'Z+',
+    ArrowDown: 'Z-',
+    Space: 'STOP',
+};
+
+export const KEY_NAMES: Record<TrackedKey, string> = {
+    KeyW: 'W',
+    KeyA: 'A',
+    KeyS: 'S',
+    KeyD: 'D',
+    KeyQ: 'Q',
+    KeyE: 'E',
+    ArrowUp: 'Up',
+    ArrowDown: 'Down',
+    Space: 'Space',
+};
 
 export function useTrackedKeys(
     enabled: boolean,
@@ -44,7 +70,9 @@ export function useTrackedKeys(
                 next.add(code);
                 return next;
             });
-            onKeyDown(code);
+            // ignore OS auto-repeat keydowns so single-press modes (discrete
+            // jog, drilling) fire exactly once per physical press
+            if (!e.repeat) onKeyDown(code);
         };
 
         const handleKeyUp = (e: KeyboardEvent) => {

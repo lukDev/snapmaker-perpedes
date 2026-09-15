@@ -1,21 +1,21 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { MAX_FEED_RATE } from '../hooks/jogControl';
 
-const STEPS = [10, 20, 50, 100, 200, 300, 500, 750, 1000, 1200, 1500];
+const STEPS = [10, 20, 50, 100, 200, 300, 500, 750, 1000, 1200, MAX_FEED_RATE];
 const MIN = STEPS[0];
-const MAX = STEPS[STEPS.length - 1];
 
 function round1(value: number): number {
     return Math.round(value * 10) / 10;
 }
 
 function clamp(value: number): number {
-    return Math.min(MAX, Math.max(MIN, value));
+    return Math.min(MAX_FEED_RATE, Math.max(MIN, value));
 }
 
 function nextStep(value: number, direction: 1 | -1): number {
     if (direction < 0) {
         const next = STEPS.find(step => step > value);
-        return next ?? MAX;
+        return next ?? MAX_FEED_RATE;
     }
     const prev = [...STEPS].reverse().find(step => step < value);
     return prev ?? MIN;

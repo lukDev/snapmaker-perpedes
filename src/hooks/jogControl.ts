@@ -4,31 +4,26 @@ import { useSerial } from './useSerial';
 const JOG_INTERVAL_MS = 100;
 const MAX_UNACKED = 2; // simple flow-control cap
 
+// ceiling shared by the feed-rate input and scroll (trim-wheel) mode's fixed speed
+export const MAX_FEED_RATE = 1500;
+
 export type Axis = 'X' | 'Y' | 'Z';
 export type Direction = 1 | -1;
 
 const AXES: Axis[] = ['X', 'Y', 'Z'];
 
-export function useJogControl(feedRate: number) {
-    const { sendGcodeAndWaitForAck, connected, homed } = useSerial();
+export function useJogControl(feedRate: number, enabled: boolean) {
+    const { sendGcodeAndWaitForAck, ensureRelativeMode } = useSerial();
     const activeMoves = useRef<Map<Axis, Set<Direction>>>(new Map());
     const unacked = useRef(0);
-    const relativeModeSet = useRef(false);
     const feedRateRef = useRef(feedRate);
     useEffect(() => {
         feedRateRef.current = feedRate;
     }, [feedRate]);
 
-    const ensureRelativeMode = useCallback(async () => {
-        if (!relativeModeSet.current) {
-            await sendGcodeAndWaitForAck('G91');
-            relativeModeSet.current = true;
-        }
-    }, [sendGcodeAndWaitForAck]);
-
     // main pulse loop
     useEffect(() => {
-        if (!connected || !homed) return;
+        if (!enabled) return;
 
         const interval = setInterval(async () => {
             if (activeMoves.current.size === 0) return;
@@ -74,12 +69,13 @@ export function useJogControl(feedRate: number) {
         }, JOG_INTERVAL_MS);
 
         return () => clearInterval(interval);
-    }, [connected, homed, sendGcodeAndWaitForAck, ensureRelativeMode]);
+    }, [enabled, sendGcodeAndWaitForAck, ensureRelativeMode]);
 
-    // clear active moves once the connection drops so a stale move doesn't jog on reconnect
+    // clear active moves once disabled (mode switch, disconnect, ...) so a
+    // stale held direction doesn't resume jogging when re-enabled
     useEffect(() => {
-        if (!connected || !homed) activeMoves.current.clear();
-    }, [connected, homed]);
+        if (!enabled) activeMoves.current.clear();
+    }, [enabled]);
 
     const startMove = useCallback((axis: Axis, direction: Direction) => {
         let directions = activeMoves.current.get(axis);
@@ -101,5 +97,5 @@ export function useJogControl(feedRate: number) {
         activeMoves.current.clear();
     }, []);
 
-    return { connected, startMove, stopMove, cancelAll };
+    return { startMove, stopMove, cancelAll };
 }

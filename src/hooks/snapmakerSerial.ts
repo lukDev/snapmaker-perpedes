@@ -44,6 +44,7 @@ export function useSnapmakerSerial() {
         null
     );
     const toolheadCaptureRef = useRef<string[] | null>(null);
+    const coordModeRef = useRef<'relative' | 'absolute' | null>(null);
     const [connected, setConnected] = useState(false);
     const [homed, setHomed] = useState(false);
     const [log, setLog] = useState<string[]>([]);
@@ -114,6 +115,20 @@ export function useSnapmakerSerial() {
         },
         [sendGcode]
     );
+
+    const ensureRelativeMode = useCallback(async () => {
+        if (coordModeRef.current !== 'relative') {
+            await sendGcodeAndWaitForAck('G91');
+            coordModeRef.current = 'relative';
+        }
+    }, [sendGcodeAndWaitForAck]);
+
+    const ensureAbsoluteMode = useCallback(async () => {
+        if (coordModeRef.current !== 'absolute') {
+            await sendGcodeAndWaitForAck('G90');
+            coordModeRef.current = 'absolute';
+        }
+    }, [sendGcodeAndWaitForAck]);
 
     const setSpindleOn = useCallback(
         async (on: boolean) => {
@@ -199,6 +214,7 @@ export function useSnapmakerSerial() {
 
             setConnected(true);
             setHomed(false);
+            coordModeRef.current = null;
             workOffsetRef.current = ZERO_POSITION;
             workPositionRef.current = null;
             setWorkPosition(null);
@@ -281,6 +297,16 @@ export function useSnapmakerSerial() {
         [sendGcodeAndWaitForAck]
     );
 
+    const goToOrigin = useCallback(
+        async (feedRate: number) => {
+            if (!writerRef.current || !workPositionRef.current) return;
+            await ensureAbsoluteMode();
+            await sendGcodeAndWaitForAck(`G1 X0 Y0 F${feedRate}`);
+            await sendGcodeAndWaitForAck(`G1 Z0 F${feedRate}`);
+        },
+        [sendGcodeAndWaitForAck, ensureAbsoluteMode]
+    );
+
     const disconnect = useCallback(async () => {
         positionPollActiveRef.current = false;
         try {
@@ -301,6 +327,7 @@ export function useSnapmakerSerial() {
             readableClosedRef.current = null;
             ackQueueRef.current = [];
             isDebugPortRef.current = false;
+            coordModeRef.current = null;
             workOffsetRef.current = ZERO_POSITION;
             workPositionRef.current = null;
             clearSpindleDebounce();
@@ -319,8 +346,11 @@ export function useSnapmakerSerial() {
         connect,
         disconnect,
         sendGcodeAndWaitForAck,
+        ensureRelativeMode,
+        ensureAbsoluteMode,
         home,
         setWorkOrigin,
+        goToOrigin,
         connected,
         homed,
         log,
