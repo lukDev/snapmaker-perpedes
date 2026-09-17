@@ -106,8 +106,8 @@ export default function MovementPanel({
         <div className="flex h-full flex-col items-center justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
             <ModeTabs mode={mode} setMode={setMode} />
 
-            <div className="h-full overflow-y-auto p-10">
-                <div className="flex flex-col items-center gap-8">
+            <div className="flex h-full flex-col overflow-y-auto p-10">
+                <div className="my-auto flex flex-col items-center gap-8">
                     <div className="flex w-full flex-col items-center gap-6">
                         {mode === 'continuous' && (
                             <ContinuousJogControls
