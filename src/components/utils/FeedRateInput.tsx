@@ -80,7 +80,7 @@ function FeedRateNumberInput({
                 onKeyDown={e => {
                     if (e.key === 'Enter') e.currentTarget.blur();
                 }}
-                className="w-18 rounded-md border border-slate-300 bg-white px-2 py-1 text-right text-slate-700 tabular-nums focus:border-emerald-400 focus:outline-none"
+                className="w-18 rounded-md border border-slate-300 bg-white px-2 py-1 text-right font-mono text-slate-700 tabular-nums focus:border-emerald-400 focus:outline-none"
             />
         </div>
     );
