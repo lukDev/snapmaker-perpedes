@@ -3,6 +3,7 @@ import { Key, WasdArrowGrid, CrosshairIcon } from '../utils/KeyBadge.tsx';
 import type { TrackedKey } from '../../hooks/useTrackedKeys.ts';
 import type { AxisPosition } from '../../hooks/snapmakerSerial.ts';
 import type { CircleOrigin } from '../../hooks/circleControl.ts';
+import FeedRateInput from '../utils/FeedRateInput.tsx';
 
 function formatRadius(
     origin: CircleOrigin | null,
@@ -20,15 +21,19 @@ export default function CircleControls({
     workPosition,
     origin,
     setOrigin,
+    speed,
+    setSpeed,
 }: {
     pressed: Set<TrackedKey>;
     ready: boolean;
     workPosition: AxisPosition | null;
     origin: CircleOrigin | null;
     setOrigin: () => void;
+    speed: number;
+    setSpeed: (value: number) => void;
 }): ReactNode {
     return (
-        <div className="flex flex-col items-center gap-6">
+        <>
             <div
                 className={`flex flex-col items-center gap-6 transition-opacity ${ready ? '' : 'pointer-events-none opacity-40'}`}>
                 <WasdArrowGrid pressed={pressed} />
@@ -53,6 +58,7 @@ export default function CircleControls({
                     Set Circle Origin
                 </button>
             </div>
-        </div>
+            <FeedRateInput value={speed} onChange={setSpeed} />
+        </>
     );
 }

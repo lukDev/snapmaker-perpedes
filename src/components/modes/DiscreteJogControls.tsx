@@ -20,7 +20,7 @@ export default function DiscreteJogControls({
     setSpeed: (value: number) => void;
 }): ReactNode {
     return (
-        <div className="flex flex-col items-center gap-6">
+        <>
             <div
                 className={`transition-opacity ${ready ? '' : 'pointer-events-none opacity-40'}`}>
                 <WasdArrowGrid pressed={pressed} />
@@ -37,6 +37,6 @@ export default function DiscreteJogControls({
                 />
                 <FeedRateInput value={speed} onChange={setSpeed} />
             </div>
-        </div>
+        </>
     );
 }

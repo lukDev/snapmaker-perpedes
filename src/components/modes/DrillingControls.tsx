@@ -36,7 +36,7 @@ export default function DrillingControls({
     descended: number;
 }): ReactNode {
     return (
-        <div className="flex flex-col items-center gap-6">
+        <>
             <div
                 className={`flex flex-col items-center gap-6 transition-opacity ${ready ? '' : 'pointer-events-none opacity-40'}`}>
                 <Key code="ArrowDown" active={pressed.has('ArrowDown')} />
@@ -76,6 +76,6 @@ export default function DrillingControls({
                     decimals={1}
                 />
             </div>
-        </div>
+        </>
     );
 }

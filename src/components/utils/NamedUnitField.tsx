@@ -10,12 +10,12 @@ export default function NamedUnitField({
     input: ReactNode;
 }): ReactNode {
     return (
-        <label className="flex items-center justify-between gap-3 text-sm text-slate-500">
-            <span>{label}</span>
-            <span className="flex items-center gap-1.5">
+        <div className="flex w-full items-center gap-3">
+            <div className="flex w-2/5 justify-end text-slate-500">{label}</div>
+            <div className="flex w-3/5 items-center justify-start gap-1.5">
                 {input}
                 <span className="text-slate-400">{unit}</span>
-            </span>
-        </label>
+            </div>
+        </div>
     );
 }

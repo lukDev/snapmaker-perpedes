@@ -72,7 +72,7 @@ export default function ScrollingControls({
     });
 
     return (
-        <div className="flex flex-col items-center gap-6">
+        <>
             <div
                 ref={containerRef}
                 className={`flex h-32 w-64 flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed text-slate-400 transition-opacity select-none ${
@@ -86,7 +86,7 @@ export default function ScrollingControls({
             <div className="flex w-full flex-col items-center gap-3">
                 <AxisSelector axis={axis} setAxis={setAxis} />
                 <NumberField
-                    label="Distance / increment"
+                    label="Increment"
                     value={distance}
                     onChange={setDistance}
                     unit="mm"
@@ -95,6 +95,6 @@ export default function ScrollingControls({
                     decimals={2}
                 />
             </div>
-        </div>
+        </>
     );
 }
