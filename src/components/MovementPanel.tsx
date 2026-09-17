@@ -103,7 +103,7 @@ export default function MovementPanel({
     const ready = connected && homed;
 
     return (
-        <div className="flex h-full flex-col items-center justify-between gap-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+        <div className="flex h-full flex-col items-center justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
             <ModeTabs mode={mode} setMode={setMode} />
 
             <div className="flex h-full flex-col items-center justify-center gap-8 overflow-y-auto p-10">
