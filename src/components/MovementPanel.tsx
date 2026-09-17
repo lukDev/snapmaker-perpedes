@@ -106,72 +106,74 @@ export default function MovementPanel({
         <div className="flex h-full flex-col items-center justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
             <ModeTabs mode={mode} setMode={setMode} />
 
-            <div className="flex h-full flex-col items-center justify-center gap-8 overflow-y-auto p-10">
-                <div className="flex w-full flex-col items-center gap-6">
-                    {mode === 'continuous' && (
-                        <ContinuousJogControls
-                            pressed={pressed}
-                            ready={ready}
-                            speed={feedRate}
-                            setSpeed={setFeedRate}
-                        />
-                    )}
-                    {mode === 'discrete' && (
-                        <DiscreteJogControls
-                            pressed={pressed}
-                            ready={ready}
-                            distance={discrete.distance}
-                            setDistance={discrete.setDistance}
-                            speed={feedRate}
-                            setSpeed={setFeedRate}
-                        />
-                    )}
-                    {mode === 'circle' && (
-                        <CircleControls
-                            pressed={pressed}
-                            ready={ready}
-                            workPosition={workPosition}
-                            origin={circle.origin}
-                            setOrigin={circle.setOrigin}
-                            speed={feedRate}
-                            setSpeed={setFeedRate}
-                        />
-                    )}
-                    {mode === 'scrolling' && (
-                        <ScrollingControls
-                            ready={ready}
-                            axis={scrolling.axis}
-                            setAxis={scrolling.setAxis}
-                            distance={scrolling.distance}
-                            setDistance={scrolling.setDistance}
-                            stopSignal={pressed.has('Space')}
-                        />
-                    )}
-                    {mode === 'drilling' && (
-                        <DrillingControls
-                            pressed={pressed}
-                            ready={ready}
-                            maxDepth={drilling.maxDepth}
-                            setMaxDepth={drilling.setMaxDepth}
-                            downSpeed={drilling.downSpeed}
-                            setDownSpeed={drilling.setDownSpeed}
-                            upSpeed={drilling.upSpeed}
-                            setUpSpeed={drilling.setUpSpeed}
-                            status={drilling.status}
-                            descended={drilling.descended}
-                        />
-                    )}
+            <div className="h-full overflow-y-auto p-10">
+                <div className="flex flex-col items-center gap-8">
+                    <div className="flex w-full flex-col items-center gap-6">
+                        {mode === 'continuous' && (
+                            <ContinuousJogControls
+                                pressed={pressed}
+                                ready={ready}
+                                speed={feedRate}
+                                setSpeed={setFeedRate}
+                            />
+                        )}
+                        {mode === 'discrete' && (
+                            <DiscreteJogControls
+                                pressed={pressed}
+                                ready={ready}
+                                distance={discrete.distance}
+                                setDistance={discrete.setDistance}
+                                speed={feedRate}
+                                setSpeed={setFeedRate}
+                            />
+                        )}
+                        {mode === 'circle' && (
+                            <CircleControls
+                                pressed={pressed}
+                                ready={ready}
+                                workPosition={workPosition}
+                                origin={circle.origin}
+                                setOrigin={circle.setOrigin}
+                                speed={feedRate}
+                                setSpeed={setFeedRate}
+                            />
+                        )}
+                        {mode === 'scrolling' && (
+                            <ScrollingControls
+                                ready={ready}
+                                axis={scrolling.axis}
+                                setAxis={scrolling.setAxis}
+                                distance={scrolling.distance}
+                                setDistance={scrolling.setDistance}
+                                stopSignal={pressed.has('Space')}
+                            />
+                        )}
+                        {mode === 'drilling' && (
+                            <DrillingControls
+                                pressed={pressed}
+                                ready={ready}
+                                maxDepth={drilling.maxDepth}
+                                setMaxDepth={drilling.setMaxDepth}
+                                downSpeed={drilling.downSpeed}
+                                setDownSpeed={drilling.setDownSpeed}
+                                upSpeed={drilling.upSpeed}
+                                setUpSpeed={drilling.setUpSpeed}
+                                status={drilling.status}
+                                descended={drilling.descended}
+                            />
+                        )}
+                    </div>
+
+                    <div className="h-px w-full bg-slate-200" />
+
+                    <PositionPanel
+                        ready={ready}
+                        workPosition={workPosition}
+                        machinePosition={machinePosition}
+                        setWorkOrigin={setWorkOrigin}
+                        goToOrigin={goToOrigin}
+                    />
                 </div>
-
-                <div className="h-px w-full bg-slate-200" />
-
-                <PositionPanel
-                    ready={ready}
-                    workPosition={workPosition}
-                    machinePosition={machinePosition}
-                    setWorkOrigin={setWorkOrigin}
-                    goToOrigin={goToOrigin}
-                />
             </div>
         </div>
     );
