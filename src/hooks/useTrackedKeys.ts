@@ -57,6 +57,9 @@ export function useTrackedKeys(
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if (!TRACKED_KEYS.includes(e.code as TrackedKey)) return;
+            // ignore key combos (e.g. Cmd+A) so OS/browser shortcuts don't
+            // also trigger machine movement
+            if (e.metaKey || e.ctrlKey || e.altKey) return;
             const code = e.code as TrackedKey;
             if (code === 'Space') {
                 e.preventDefault();

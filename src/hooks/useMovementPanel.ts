@@ -11,7 +11,6 @@ export type MovementMode =
 
 const DEFAULT_FEED_RATE = 300;
 const DEFAULT_DISCRETE_DISTANCE = 1;
-const DEFAULT_DISCRETE_SPEED = 300;
 const DEFAULT_MAX_DEPTH = 5;
 const DEFAULT_DOWN_SPEED = 100;
 const DEFAULT_UP_SPEED = 300;
@@ -46,7 +45,6 @@ export function useMovementPanel() {
     const [discreteDistance, setDiscreteDistance] = useState(
         DEFAULT_DISCRETE_DISTANCE
     );
-    const [discreteSpeed, setDiscreteSpeed] = useState(DEFAULT_DISCRETE_SPEED);
     const [maxDepth, setMaxDepth] = useState(DEFAULT_MAX_DEPTH);
     const [downSpeed, setDownSpeed] = useState(DEFAULT_DOWN_SPEED);
     const [upSpeed, setUpSpeed] = useState(DEFAULT_UP_SPEED);
@@ -67,7 +65,7 @@ export function useMovementPanel() {
 
     const discreteEnabled = ready && mode === 'discrete';
     const { trigger: discreteTrigger, cancel: discreteCancel } =
-        useDiscreteJogControl(discreteEnabled, discreteDistance, discreteSpeed);
+        useDiscreteJogControl(discreteEnabled, discreteDistance, feedRate);
 
     const drillingEnabled = ready && mode === 'drilling';
     const {
@@ -193,8 +191,8 @@ export function useMovementPanel() {
         discrete: {
             distance: discreteDistance,
             setDistance: setDiscreteDistance,
-            speed: discreteSpeed,
-            setSpeed: setDiscreteSpeed,
+            speed: feedRate,
+            setSpeed: setFeedRate,
         },
         drilling: {
             maxDepth,
