@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useSerial } from './useSerial';
 import type { AxisPosition } from './snapmakerSerial';
 
@@ -7,22 +7,17 @@ const MAX_UNACKED = 2; // simple flow-control cap
 const MIN_RADIUS = 0.01; // mm — below this there's no defined angle to rotate around
 
 export type RotateDirection = 'cw' | 'ccw';
-export type CircleOrigin = { x: number; y: number };
 
 export function useCircleControl({
     enabled,
-    ready,
     feedRate,
     workPosition,
 }: {
     enabled: boolean;
-    ready: boolean;
     feedRate: number;
     workPosition: AxisPosition | null;
 }) {
     const { sendGcodeAndWaitForAck, ensureRelativeMode } = useSerial();
-    const [origin, setOriginState] = useState<CircleOrigin | null>(null);
-    const originRef = useRef<CircleOrigin | null>(null);
 
     const workPositionRef = useRef(workPosition);
     useEffect(() => {
@@ -38,21 +33,12 @@ export function useCircleControl({
     const angleRef = useRef(0);
     const unackedRef = useRef(0);
 
-    const setOrigin = useCallback(() => {
-        const pos = workPositionRef.current;
-        if (!pos) return;
-        const next = { x: pos.x, y: pos.y };
-        originRef.current = next;
-        setOriginState(next);
-    }, []);
-
     // main pulse loop — advances angle around the fixed origin/radius and
     // sends the resulting arc segment as a relative G2/G3 move
     useEffect(() => {
         if (!enabled) return;
 
         const interval = setInterval(async () => {
-            if (!originRef.current) return;
             if (activeDirections.current.size === 0) return;
             if (unackedRef.current >= MAX_UNACKED) return;
 
@@ -92,33 +78,20 @@ export function useCircleControl({
         return () => clearInterval(interval);
     }, [enabled, sendGcodeAndWaitForAck, ensureRelativeMode]);
 
-    // stop rotating once disabled (mode switch, disconnect, ...); origin
-    // itself only clears when the connection/homing state resets, so
-    // switching away from circle mode and back keeps it
+    // stop rotating once disabled (mode switch, disconnect, ...)
     useEffect(() => {
         if (!enabled) activeDirections.current.clear();
     }, [enabled]);
 
-    // clears whenever `ready` is about to change (or on unmount) — the
-    // no-op case (already null) is harmless, and this is what fires the
-    // clear on the true -> false transition we actually care about
-    useEffect(() => {
-        return () => {
-            originRef.current = null;
-            setOriginState(null);
-        };
-    }, [ready]);
-
+    // the circle's center is always the work origin (0,0) — radius/angle
+    // are simply the current work position's polar coordinates
     const seedFromCurrentPosition = useCallback(() => {
-        const origin = originRef.current;
         const pos = workPositionRef.current;
-        if (!origin || !pos) return false;
-        const dx = pos.x - origin.x;
-        const dy = pos.y - origin.y;
-        const radius = Math.hypot(dx, dy);
+        if (!pos) return false;
+        const radius = Math.hypot(pos.x, pos.y);
         if (radius < MIN_RADIUS) return false;
         radiusRef.current = radius;
-        angleRef.current = Math.atan2(dy, dx);
+        angleRef.current = Math.atan2(pos.y, pos.x);
         return true;
     }, []);
 
@@ -140,5 +113,5 @@ export function useCircleControl({
         activeDirections.current.clear();
     }, []);
 
-    return { origin, setOrigin, startRotate, stopRotate, cancel };
+    return { startRotate, stopRotate, cancel };
 }

@@ -82,18 +82,12 @@ export function useMovementPanel() {
     } = useDrillingControl(drillingEnabled, maxDepth, downSpeed, upSpeed);
 
     const circleEnabled = ready && mode === 'circle';
-    const {
-        origin: circleOrigin,
-        setOrigin: setCircleOrigin,
-        startRotate,
-        stopRotate,
-        cancel: circleCancel,
-    } = useCircleControl({
-        enabled: circleEnabled,
-        ready,
-        feedRate,
-        workPosition,
-    });
+    const { startRotate, stopRotate, cancel: circleCancel } =
+        useCircleControl({
+            enabled: circleEnabled,
+            feedRate,
+            workPosition,
+        });
 
     const stopAll = useCallback(() => {
         jogCancelAll();
@@ -181,6 +175,11 @@ export function useMovementPanel() {
         [goToOrigin]
     );
 
+    const setCircleOrigin = useCallback(
+        () => setWorkOrigin(['X', 'Y']),
+        [setWorkOrigin]
+    );
+
     return {
         connected,
         homed,
@@ -210,7 +209,6 @@ export function useMovementPanel() {
             descended: drillingDescended,
         },
         circle: {
-            origin: circleOrigin,
             setOrigin: setCircleOrigin,
         },
         scrolling: {

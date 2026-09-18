@@ -2,24 +2,19 @@ import type { ReactNode } from 'react';
 import { Key, WasdArrowGrid, CrosshairIcon } from '../utils/KeyBadge.tsx';
 import type { TrackedKey } from '../../hooks/useTrackedKeys.ts';
 import type { AxisPosition } from '../../hooks/snapmakerSerial.ts';
-import type { CircleOrigin } from '../../hooks/circleControl.ts';
 import FeedRateInput from '../utils/FeedRateInput.tsx';
 
-function formatRadius(
-    origin: CircleOrigin | null,
-    workPosition: AxisPosition | null
-): string {
-    if (!origin || !workPosition) return '—';
-    const dx = workPosition.x - origin.x;
-    const dy = workPosition.y - origin.y;
-    return `${Math.hypot(dx, dy).toFixed(2)} mm`;
+// the circle's center is always the work origin (0,0) — radius is just the
+// current work position's distance from it
+function formatRadius(workPosition: AxisPosition | null): string {
+    if (!workPosition) return '—';
+    return `${Math.hypot(workPosition.x, workPosition.y).toFixed(2)} mm`;
 }
 
 export default function CircleControls({
     pressed,
     ready,
     workPosition,
-    origin,
     setOrigin,
     speed,
     setSpeed,
@@ -27,7 +22,6 @@ export default function CircleControls({
     pressed: Set<TrackedKey>;
     ready: boolean;
     workPosition: AxisPosition | null;
-    origin: CircleOrigin | null;
     setOrigin: () => void;
     speed: number;
     setSpeed: (value: number) => void;
@@ -46,7 +40,7 @@ export default function CircleControls({
                 <span className="text-sm text-slate-500">
                     Radius:{' '}
                     <span className="font-mono text-slate-700 tabular-nums">
-                        {formatRadius(origin, workPosition)}
+                        {formatRadius(workPosition)}
                     </span>
                 </span>
                 <button

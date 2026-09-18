@@ -7,7 +7,6 @@ import PositionPanel from './PositionPanel';
 import type { TrackedKey } from '../hooks/useTrackedKeys';
 import type { Axis, AxisPosition } from '../hooks/snapmakerSerial';
 import type { MovementMode } from '../hooks/useMovementPanel';
-import type { CircleOrigin } from '../hooks/circleControl';
 import type { DrillingStatus } from '../hooks/drillingControl';
 import ContinuousJogControls from './modes/ContinuousJogControls.tsx';
 
@@ -90,7 +89,6 @@ export default function MovementPanel({
         descended: number;
     };
     circle: {
-        origin: CircleOrigin | null;
         setOrigin: () => void;
     };
     scrolling: {
@@ -132,7 +130,6 @@ export default function MovementPanel({
                                 pressed={pressed}
                                 ready={ready}
                                 workPosition={workPosition}
-                                origin={circle.origin}
                                 setOrigin={circle.setOrigin}
                                 speed={feedRate}
                                 setSpeed={setFeedRate}
