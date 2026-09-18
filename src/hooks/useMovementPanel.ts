@@ -1,5 +1,10 @@
 import { useCallback, useState } from 'react';
-import { useJogControl, type Axis, type Direction } from './jogControl';
+import {
+    useJogControl,
+    MAX_FEED_RATE,
+    type Axis,
+    type Direction,
+} from './jogControl';
 import { useDiscreteJogControl } from './discreteJogControl';
 import { useDrillingControl } from './drillingControl';
 import { useCircleControl } from './circleControl';
@@ -172,8 +177,8 @@ export function useMovementPanel() {
     const pressed = useTrackedKeys(ready, onKeyDown, onKeyUp, stopAll);
 
     const goToOriginAtFeedRate = useCallback(
-        () => goToOrigin(feedRate),
-        [goToOrigin, feedRate]
+        () => goToOrigin(MAX_FEED_RATE),
+        [goToOrigin]
     );
 
     return {
