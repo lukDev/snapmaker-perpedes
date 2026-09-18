@@ -55,6 +55,13 @@ export function useCircleControl({
                 (currentFeedRate * (PULSE_INTERVAL_MS / 60000)) / radius;
             const angle = angleRef.current;
             const newAngle = angle + net * deltaTheta;
+            // committed synchronously, before any await: MAX_UNACKED lets a
+            // later tick fire while this one's send is still in flight, and
+            // if that tick read a stale angleRef it would recompute this
+            // same delta and send it again — doubling the physical move
+            // while software only advanced once, walking the arc's true
+            // center away from the origin
+            angleRef.current = newAngle;
 
             // computed parametrically from the fixed radius/angle rather than
             // accumulated, so drift can't build up over a long hold
@@ -72,7 +79,6 @@ export function useCircleControl({
                 `${gcode} X${dx.toFixed(3)} Y${dy.toFixed(3)} I${i.toFixed(3)} J${j.toFixed(3)} F${currentFeedRate}`
             );
             unackedRef.current = Math.max(0, unackedRef.current - 1);
-            angleRef.current = newAngle;
         }, PULSE_INTERVAL_MS);
 
         return () => clearInterval(interval);
