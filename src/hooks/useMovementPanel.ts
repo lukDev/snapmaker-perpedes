@@ -16,6 +16,7 @@ export type MovementMode =
 
 const DEFAULT_FEED_RATE = 300;
 const DEFAULT_DISCRETE_DISTANCE = 1;
+const DEFAULT_CIRCLE_ANGLE = 15;
 const DEFAULT_MAX_DEPTH = 5;
 const DEFAULT_DOWN_SPEED = 100;
 const DEFAULT_UP_SPEED = 300;
@@ -50,6 +51,7 @@ export function useMovementPanel() {
     const [discreteDistance, setDiscreteDistance] = useState(
         DEFAULT_DISCRETE_DISTANCE
     );
+    const [circleAngle, setCircleAngle] = useState(DEFAULT_CIRCLE_ANGLE);
     const [maxDepth, setMaxDepth] = useState(DEFAULT_MAX_DEPTH);
     const [downSpeed, setDownSpeed] = useState(DEFAULT_DOWN_SPEED);
     const [upSpeed, setUpSpeed] = useState(DEFAULT_UP_SPEED);
@@ -82,12 +84,12 @@ export function useMovementPanel() {
     } = useDrillingControl(drillingEnabled, maxDepth, downSpeed, upSpeed);
 
     const circleEnabled = ready && mode === 'circle';
-    const { startRotate, stopRotate, cancel: circleCancel } =
-        useCircleControl({
-            enabled: circleEnabled,
-            feedRate,
-            workPosition,
-        });
+    const { trigger: circleTrigger, cancel: circleCancel } = useCircleControl({
+        enabled: circleEnabled,
+        feedRate,
+        angle: circleAngle,
+        workPosition,
+    });
 
     const stopAll = useCallback(() => {
         jogCancelAll();
@@ -131,15 +133,15 @@ export function useMovementPanel() {
                 case 'circle': {
                     const mapping = KEY_TO_AXIS[code];
                     if (mapping) jogStart(mapping.axis, mapping.direction);
-                    else if (code === 'KeyQ') startRotate('ccw');
-                    else if (code === 'KeyE') startRotate('cw');
+                    else if (code === 'KeyQ') circleTrigger('ccw');
+                    else if (code === 'KeyE') circleTrigger('cw');
                     break;
                 }
                 case 'scrolling':
                     break;
             }
         },
-        [mode, jogStart, discreteTrigger, drillingStart, startRotate]
+        [mode, jogStart, discreteTrigger, drillingStart, circleTrigger]
     );
 
     const onKeyUp = useCallback(
@@ -156,8 +158,6 @@ export function useMovementPanel() {
                 case 'circle': {
                     const mapping = KEY_TO_AXIS[code];
                     if (mapping) jogStop(mapping.axis, mapping.direction);
-                    else if (code === 'KeyQ') stopRotate('ccw');
-                    else if (code === 'KeyE') stopRotate('cw');
                     break;
                 }
                 case 'discrete':
@@ -165,7 +165,7 @@ export function useMovementPanel() {
                     break;
             }
         },
-        [mode, jogStop, drillingStop, stopRotate]
+        [mode, jogStop, drillingStop]
     );
 
     const pressed = useTrackedKeys(ready, onKeyDown, onKeyUp, stopAll);
@@ -210,6 +210,8 @@ export function useMovementPanel() {
         },
         circle: {
             setOrigin: setCircleOrigin,
+            angle: circleAngle,
+            setAngle: setCircleAngle,
         },
         scrolling: {
             axis: scrollAxis,

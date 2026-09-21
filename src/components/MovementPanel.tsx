@@ -90,6 +90,8 @@ export default function MovementPanel({
     };
     circle: {
         setOrigin: () => void;
+        angle: number;
+        setAngle: (value: number) => void;
     };
     scrolling: {
         axis: Axis;
@@ -131,6 +133,8 @@ export default function MovementPanel({
                                 ready={ready}
                                 workPosition={workPosition}
                                 setOrigin={circle.setOrigin}
+                                angle={circle.angle}
+                                setAngle={circle.setAngle}
                                 speed={feedRate}
                                 setSpeed={setFeedRate}
                             />

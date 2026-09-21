@@ -3,6 +3,7 @@ import { Key, WasdArrowGrid, CrosshairIcon } from '../utils/KeyBadge.tsx';
 import type { TrackedKey } from '../../hooks/useTrackedKeys.ts';
 import type { AxisPosition } from '../../hooks/snapmakerSerial.ts';
 import FeedRateInput from '../utils/FeedRateInput.tsx';
+import NumberField from '../utils/NumberField.tsx';
 
 // the circle's center is always the work origin (0,0) — radius is just the
 // current work position's distance from it
@@ -16,6 +17,8 @@ export default function CircleControls({
     ready,
     workPosition,
     setOrigin,
+    angle,
+    setAngle,
     speed,
     setSpeed,
 }: {
@@ -23,6 +26,8 @@ export default function CircleControls({
     ready: boolean;
     workPosition: AxisPosition | null;
     setOrigin: () => void;
+    angle: number;
+    setAngle: (value: number) => void;
     speed: number;
     setSpeed: (value: number) => void;
 }): ReactNode {
@@ -52,7 +57,18 @@ export default function CircleControls({
                     Set Circle Origin
                 </button>
             </div>
-            <FeedRateInput value={speed} onChange={setSpeed} />
+            <div className="flex w-full flex-col gap-2">
+                <NumberField
+                    label="Angle"
+                    value={angle}
+                    onChange={setAngle}
+                    unit="deg"
+                    min={0.1}
+                    max={360}
+                    decimals={1}
+                />
+                <FeedRateInput value={speed} onChange={setSpeed} />
+            </div>
         </>
     );
 }
