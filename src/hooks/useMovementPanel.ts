@@ -91,26 +91,27 @@ export function useMovementPanel() {
         workPosition,
     });
 
-    const stopAll = useCallback(() => {
+    // halt motion only — the spindle keeps running, so switching modes
+    // mid-job doesn't force the operator to spin back up
+    const stopMovement = useCallback(() => {
         jogCancelAll();
         discreteCancel();
         drillingCancel();
         circleCancel();
+    }, [jogCancelAll, discreteCancel, drillingCancel, circleCancel]);
+
+    // emergency stop: motion *and* spindle
+    const stopAll = useCallback(() => {
+        stopMovement();
         setSpindleOn(false);
-    }, [
-        jogCancelAll,
-        discreteCancel,
-        drillingCancel,
-        circleCancel,
-        setSpindleOn,
-    ]);
+    }, [stopMovement, setSpindleOn]);
 
     const setMode = useCallback(
         (next: MovementMode) => {
-            stopAll();
+            stopMovement();
             setModeState(next);
         },
-        [stopAll]
+        [stopMovement]
     );
 
     const onKeyDown = useCallback(
