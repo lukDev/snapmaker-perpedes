@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Key, WasdArrowGrid, CrosshairIcon } from '../utils/KeyBadge.tsx';
+import { Key, CrosshairIcon } from '../utils/KeyBadge.tsx';
 import type { TrackedKey } from '../../hooks/useTrackedKeys.ts';
 import type { AxisPosition } from '../../hooks/snapmakerSerial.ts';
 import FeedRateInput from '../utils/FeedRateInput.tsx';
@@ -35,7 +35,6 @@ export default function CircleControls({
         <>
             <div
                 className={`flex flex-col items-center gap-6 transition-opacity ${ready ? '' : 'pointer-events-none opacity-40'}`}>
-                <WasdArrowGrid pressed={pressed} />
                 <div className="flex items-center gap-2">
                     <Key code="KeyQ" active={pressed.has('KeyQ')} />
                     <Key code="KeyE" active={pressed.has('KeyE')} />
