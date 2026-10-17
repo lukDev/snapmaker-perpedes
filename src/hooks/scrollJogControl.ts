@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, type RefObject } from 'react';
 import { useSerial } from './useSerial';
 import { MAX_FEED_RATE, type Axis, type Direction } from './jogControl';
 
-// mirrors FeedRateInput's wheel-notch threshold
-const WHEEL_THRESHOLD = 80;
+// one wheel notch of the input device, in pixels
+const PIXELS_PER_SCROLL_UNIT = 128;
 
 type QueuedMove = { axis: Axis; distance: number; direction: Direction };
 
@@ -32,7 +32,6 @@ export function useScrollJogControl({
 
     const queueRef = useRef<QueuedMove[]>([]);
     const drainingRef = useRef(false);
-    const accumRef = useRef(0);
 
     // event-driven drain: fires as fast as the machine acks, so scrolling
     // faster queues (and thus executes) more increments per second — the
@@ -64,18 +63,24 @@ export function useScrollJogControl({
         // bind natively — same reason FeedRateInput does this by hand
         const onWheel = (e: WheelEvent) => {
             e.preventDefault();
-            const accum = accumRef.current + e.deltaY;
-            if (Math.abs(accum) < WHEEL_THRESHOLD) {
-                accumRef.current = accum;
-                return;
+            if (e.deltaY === 0) return;
+            const direction: Direction = e.deltaY < 0 ? 1 : -1;
+
+            // one event isn't always one notch: when scrolling fast the browser
+            // coalesces several notches into a single event, so derive how many
+            // notches this event carries and queue one separate move per notch
+            const units = Math.max(
+                1,
+                Math.round(Math.abs(e.deltaY) / PIXELS_PER_SCROLL_UNIT)
+            );
+
+            for (let i = 0; i < units; i++) {
+                queueRef.current.push({
+                    axis: axisRef.current,
+                    distance: distanceRef.current,
+                    direction,
+                });
             }
-            accumRef.current = 0;
-            const direction: Direction = accum < 0 ? 1 : -1;
-            queueRef.current.push({
-                axis: axisRef.current,
-                distance: distanceRef.current,
-                direction,
-            });
             void drain();
         };
 
@@ -85,10 +90,7 @@ export function useScrollJogControl({
 
     // drop pending increments once disabled (mode switch, disconnect, ...)
     useEffect(() => {
-        if (!enabled) {
-            queueRef.current = [];
-            accumRef.current = 0;
-        }
+        if (!enabled) queueRef.current = [];
     }, [enabled]);
 
     // global stop clears anything not yet sent; in-flight sends can't be recalled
