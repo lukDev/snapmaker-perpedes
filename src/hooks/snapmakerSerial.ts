@@ -25,6 +25,10 @@ export const SUPPORTED_SPINDLE_TOOLHEAD = '200W CNC';
 // several detail lines we don't care about, then "ok".
 const TOOL_HEAD_LINE_RE = /^Tool Head:\s*(.+)$/i;
 
+// Marlin still acks rejected commands with "ok", so failure has to be read
+// from the lines preceding it ("Error:...", "echo:Unknown command: ...")
+const ERROR_RESPONSE_RE = /^(error|!!)|unknown command/i;
+
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export function useSnapmakerSerial() {
@@ -44,6 +48,7 @@ export function useSnapmakerSerial() {
         null
     );
     const toolheadCaptureRef = useRef<string[] | null>(null);
+    const manualCaptureRef = useRef<string[] | null>(null);
     const coordModeRef = useRef<'relative' | 'absolute' | null>(null);
     const [connected, setConnected] = useState(false);
     const [homed, setHomed] = useState(false);
@@ -235,6 +240,7 @@ export function useSnapmakerSerial() {
                                 ackQueueRef.current.shift()?.();
                             } else {
                                 toolheadCaptureRef.current?.push(value);
+                                manualCaptureRef.current?.push(value);
                             }
                             applyPositionReport(value);
                         }
@@ -307,6 +313,28 @@ export function useSnapmakerSerial() {
         [sendGcodeAndWaitForAck, ensureAbsoluteMode]
     );
 
+    // sends one user-entered line; resolves with the response lines received
+    // until its ack, rejects if not connected or the machine reported an error
+    const sendManualGcode = useCallback(
+        async (line: string) => {
+            if (!writerRef.current) throw new Error('Not connected.');
+            manualCaptureRef.current = [];
+            try {
+                await sendGcodeAndWaitForAck(line);
+            } finally {
+                // the line may have switched G90/G91 behind our back, so
+                // force the next mover to re-assert its coordinate mode
+                coordModeRef.current = null;
+            }
+            const response = manualCaptureRef.current ?? [];
+            manualCaptureRef.current = null;
+            const error = response.find(l => ERROR_RESPONSE_RE.test(l));
+            if (error) throw new Error(error);
+            return response;
+        },
+        [sendGcodeAndWaitForAck]
+    );
+
     const disconnect = useCallback(async () => {
         positionPollActiveRef.current = false;
         try {
@@ -333,6 +361,7 @@ export function useSnapmakerSerial() {
             clearSpindleDebounce();
             spindleOnRef.current = false;
             toolheadCaptureRef.current = null;
+            manualCaptureRef.current = null;
             setConnected(false);
             setHomed(false);
             setWorkPosition(null);
@@ -351,6 +380,7 @@ export function useSnapmakerSerial() {
         home,
         setWorkOrigin,
         goToOrigin,
+        sendManualGcode,
         connected,
         homed,
         log,

@@ -24,6 +24,7 @@ function ControlPanels(): ReactNode {
         drilling,
         circle,
         scrolling,
+        gcode,
     } = useMovementPanel();
 
     return (
@@ -44,6 +45,7 @@ function ControlPanels(): ReactNode {
                 drilling={drilling}
                 circle={circle}
                 scrolling={scrolling}
+                gcode={gcode}
             />
             <div className="flex flex-col items-stretch gap-6">
                 <SpindlePanel />

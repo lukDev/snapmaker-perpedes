@@ -37,6 +37,12 @@ export const KEY_NAMES: Record<TrackedKey, string> = {
     Space: 'Space',
 };
 
+// free-text fields (the G-code console) need letters and spaces to type,
+// not to jog or stop the machine
+function isTypingTarget(target: EventTarget | null): boolean {
+    return target instanceof HTMLTextAreaElement;
+}
+
 export function useTrackedKeys(
     enabled: boolean,
     onKeyDown: (code: TrackedKey) => void,
@@ -57,6 +63,7 @@ export function useTrackedKeys(
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if (!TRACKED_KEYS.includes(e.code as TrackedKey)) return;
+            if (isTypingTarget(e.target)) return;
             // ignore key combos (e.g. Cmd+A) so OS/browser shortcuts don't
             // also trigger machine movement
             if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -80,6 +87,7 @@ export function useTrackedKeys(
 
         const handleKeyUp = (e: KeyboardEvent) => {
             if (!TRACKED_KEYS.includes(e.code as TrackedKey)) return;
+            if (isTypingTarget(e.target)) return;
             const code = e.code as TrackedKey;
             setPressed(prev => {
                 if (!prev.has(code)) return prev;

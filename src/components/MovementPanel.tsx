@@ -3,11 +3,13 @@ import DiscreteJogControls from './modes/DiscreteJogControls.tsx';
 import DrillingControls from './modes/DrillingControls.tsx';
 import CircleControls from './modes/CircleControls.tsx';
 import ScrollingControls from './modes/ScrollingControls.tsx';
+import GcodeControls from './modes/GcodeControls.tsx';
 import PositionPanel from './PositionPanel';
 import type { TrackedKey } from '../hooks/useTrackedKeys';
 import type { Axis, AxisPosition } from '../hooks/snapmakerSerial';
 import type { MovementMode } from '../hooks/useMovementPanel';
 import type { DrillingStatus } from '../hooks/drillingControl';
+import type { GcodePacket } from '../hooks/gcodeConsole';
 import ContinuousJogControls from './modes/ContinuousJogControls.tsx';
 
 const MODES: { mode: MovementMode; label: string }[] = [
@@ -16,6 +18,7 @@ const MODES: { mode: MovementMode; label: string }[] = [
     { mode: 'circle', label: 'Circle' },
     { mode: 'scrolling', label: 'Scroll' },
     { mode: 'drilling', label: 'Drilling' },
+    { mode: 'gcode', label: 'G-Code' },
 ];
 
 function ModeTabs({
@@ -62,6 +65,7 @@ export default function MovementPanel({
     drilling,
     circle,
     scrolling,
+    gcode,
 }: {
     connected: boolean;
     homed: boolean;
@@ -98,6 +102,14 @@ export default function MovementPanel({
         setAxis: (axis: Axis) => void;
         distance: number;
         setDistance: (value: number) => void;
+    };
+    gcode: {
+        packets: GcodePacket[];
+        draftCode: string;
+        setDraftCode: (code: string) => void;
+        canSend: boolean;
+        send: () => void;
+        reuse: (id: number) => void;
     };
 }): ReactNode {
     const ready = connected && homed;
@@ -161,6 +173,17 @@ export default function MovementPanel({
                                 setUpSpeed={drilling.setUpSpeed}
                                 status={drilling.status}
                                 descended={drilling.descended}
+                            />
+                        )}
+                        {mode === 'gcode' && (
+                            <GcodeControls
+                                ready={ready}
+                                packets={gcode.packets}
+                                draftCode={gcode.draftCode}
+                                setDraftCode={gcode.setDraftCode}
+                                canSend={gcode.canSend}
+                                send={gcode.send}
+                                reuse={gcode.reuse}
                             />
                         )}
                     </div>

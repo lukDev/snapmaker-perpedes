@@ -8,11 +8,17 @@ import {
 import { useDiscreteJogControl } from './discreteJogControl';
 import { useDrillingControl } from './drillingControl';
 import { useCircleControl } from './circleControl';
+import { useGcodeConsole } from './gcodeConsole';
 import { useTrackedKeys, type TrackedKey } from './useTrackedKeys';
 import { useSerial } from './useSerial';
 
 export type MovementMode =
-    'continuous' | 'discrete' | 'drilling' | 'circle' | 'scrolling';
+    | 'continuous'
+    | 'discrete'
+    | 'drilling'
+    | 'circle'
+    | 'scrolling'
+    | 'gcode';
 
 const DEFAULT_FEED_RATE = 300;
 const DEFAULT_DISCRETE_DISTANCE = 1;
@@ -91,6 +97,8 @@ export function useMovementPanel() {
         workPosition,
     });
 
+    const gcode = useGcodeConsole(ready && mode === 'gcode');
+
     // halt motion only — the spindle keeps running, so switching modes
     // mid-job doesn't force the operator to spin back up
     const stopMovement = useCallback(() => {
@@ -139,6 +147,7 @@ export function useMovementPanel() {
                     break;
                 }
                 case 'scrolling':
+                case 'gcode':
                     break;
             }
         },
@@ -163,6 +172,7 @@ export function useMovementPanel() {
                 }
                 case 'discrete':
                 case 'scrolling':
+                case 'gcode':
                     break;
             }
         },
@@ -220,5 +230,6 @@ export function useMovementPanel() {
             distance: scrollDistance,
             setDistance: setScrollDistance,
         },
+        gcode,
     };
 }

@@ -39,6 +39,12 @@ Can be used with a regular mouse wheel, but is actually intended to be used with
 Allows for drill-press-like behaviour.
 After setting the max depth and up and down speeds, pressing Z- moves the toolhead down and releasing it automatically moves it back up.
 
+#### G-Code
+
+Enter G-Code manually (one or more lines) and send it with the button or Cmd/Ctrl+Enter.
+Everything sent during the current session is listed on the left along with its state (new / in execution / executed / failed).
+Clicking a previous entry copies its code back into the editor.
+
 ### Disclaimer
 
 This code has been tested on a Snapmaker 2.0 A350T.
