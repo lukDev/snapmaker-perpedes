@@ -12,6 +12,20 @@ Manual control application for Snapmaker machines.
 4. Click "Home" (skips actual homing if that has already happened).
 5. Enjoy your manual control :)
 
+### Nudge Keys
+
+Independent of the selected mode, the keys 1-8 (digit row or numpad) always nudge the machine by a fixed increment:
+
+| Key | Movement   | Key | Movement   |
+|-----|------------|-----|------------|
+| 1   | X+ 0.1mm   | 2   | X- 0.1mm   |
+| 3   | Y+ 0.1mm   | 4   | Y- 0.1mm   |
+| 5   | Z+ 0.1mm   | 6   | Z- 0.1mm   |
+| 7   | B+ 0.2°    | 8   | B- 0.2°    |
+
+Each keystroke (including auto-repeat while holding a key) queues one increment.
+Intended for use with a CNC jog wheel / macro pad that emits these keys.
+
 ### Modes
 
 #### Continuous
@@ -28,11 +42,6 @@ By pressing a button, the machine will move the set distance at the set speed in
 Like discrete mode, but circular.
 After setting the angle and speed and pressing CCW or CW, the machine will move along an arc around the work origin (in X and Y).
 The current radius (calculated based on the work origin and current position) is shown in the UI.
-
-#### Scroll
-
-Scrolling moves the machine by the configured increment along the selected axis.
-Can be used with a regular mouse wheel, but is actually intended to be used with a CNC jog wheel.
 
 #### Drilling
 

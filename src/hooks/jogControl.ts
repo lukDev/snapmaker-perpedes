@@ -4,7 +4,7 @@ import { useSerial } from './useSerial';
 const JOG_INTERVAL_MS = 100;
 const MAX_UNACKED = 2; // simple flow-control cap
 
-// ceiling shared by the feed-rate input and scroll (trim-wheel) mode's fixed speed
+// ceiling shared by the feed-rate input and the fixed speed of keystroke nudges
 export const MAX_FEED_RATE = 1500;
 
 export type Axis = 'X' | 'Y' | 'Z';

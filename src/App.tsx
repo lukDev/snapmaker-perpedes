@@ -23,7 +23,6 @@ function ControlPanels(): ReactNode {
         discrete,
         drilling,
         circle,
-        scrolling,
         gcode,
     } = useMovementPanel();
 
@@ -44,7 +43,6 @@ function ControlPanels(): ReactNode {
                 discrete={discrete}
                 drilling={drilling}
                 circle={circle}
-                scrolling={scrolling}
                 gcode={gcode}
             />
             <div className="flex flex-col items-stretch gap-6">

@@ -9,6 +9,7 @@ import { useDiscreteJogControl } from './discreteJogControl';
 import { useDrillingControl } from './drillingControl';
 import { useCircleControl } from './circleControl';
 import { useGcodeConsole } from './gcodeConsole';
+import { useNudgeKeyControl } from './nudgeKeyControl';
 import { useTrackedKeys, type TrackedKey } from './useTrackedKeys';
 import { useSerial } from './useSerial';
 
@@ -17,7 +18,6 @@ export type MovementMode =
     | 'discrete'
     | 'drilling'
     | 'circle'
-    | 'scrolling'
     | 'gcode';
 
 const DEFAULT_FEED_RATE = 300;
@@ -26,8 +26,6 @@ const DEFAULT_CIRCLE_ANGLE = 15;
 const DEFAULT_MAX_DEPTH = 5;
 const DEFAULT_DOWN_SPEED = 100;
 const DEFAULT_UP_SPEED = 300;
-const DEFAULT_SCROLL_AXIS: Axis = 'X';
-const DEFAULT_SCROLL_DISTANCE = 0.1;
 
 const KEY_TO_AXIS: Partial<
     Record<TrackedKey, { axis: Axis; direction: Direction }>
@@ -61,10 +59,6 @@ export function useMovementPanel() {
     const [maxDepth, setMaxDepth] = useState(DEFAULT_MAX_DEPTH);
     const [downSpeed, setDownSpeed] = useState(DEFAULT_DOWN_SPEED);
     const [upSpeed, setUpSpeed] = useState(DEFAULT_UP_SPEED);
-    const [scrollAxis, setScrollAxis] = useState<Axis>(DEFAULT_SCROLL_AXIS);
-    const [scrollDistance, setScrollDistance] = useState(
-        DEFAULT_SCROLL_DISTANCE
-    );
 
     // continuous jog engine backs both the "continuous" mode and XY/Z
     // repositioning within "circle" mode
@@ -99,6 +93,9 @@ export function useMovementPanel() {
 
     const gcode = useGcodeConsole(ready && mode === 'gcode');
 
+    // 1-8 keystroke nudges are active in every mode
+    const { cancel: nudgeCancel } = useNudgeKeyControl(ready);
+
     // halt motion only — the spindle keeps running, so switching modes
     // mid-job doesn't force the operator to spin back up
     const stopMovement = useCallback(() => {
@@ -106,7 +103,8 @@ export function useMovementPanel() {
         discreteCancel();
         drillingCancel();
         circleCancel();
-    }, [jogCancelAll, discreteCancel, drillingCancel, circleCancel]);
+        nudgeCancel();
+    }, [jogCancelAll, discreteCancel, drillingCancel, circleCancel, nudgeCancel]);
 
     // emergency stop: motion *and* spindle
     const stopAll = useCallback(() => {
@@ -146,7 +144,6 @@ export function useMovementPanel() {
                     else if (code === 'KeyE') circleTrigger('cw');
                     break;
                 }
-                case 'scrolling':
                 case 'gcode':
                     break;
             }
@@ -171,7 +168,6 @@ export function useMovementPanel() {
                     break;
                 }
                 case 'discrete':
-                case 'scrolling':
                 case 'gcode':
                     break;
             }
@@ -223,12 +219,6 @@ export function useMovementPanel() {
             setOrigin: setCircleOrigin,
             angle: circleAngle,
             setAngle: setCircleAngle,
-        },
-        scrolling: {
-            axis: scrollAxis,
-            setAxis: setScrollAxis,
-            distance: scrollDistance,
-            setDistance: setScrollDistance,
         },
         gcode,
     };

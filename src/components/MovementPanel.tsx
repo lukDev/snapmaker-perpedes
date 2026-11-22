@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import DiscreteJogControls from './modes/DiscreteJogControls.tsx';
 import DrillingControls from './modes/DrillingControls.tsx';
 import CircleControls from './modes/CircleControls.tsx';
-import ScrollingControls from './modes/ScrollingControls.tsx';
 import GcodeControls from './modes/GcodeControls.tsx';
 import PositionPanel from './PositionPanel';
 import type { TrackedKey } from '../hooks/useTrackedKeys';
@@ -17,7 +16,6 @@ const MODES: { mode: MovementMode; label: string }[] = [
     { mode: 'circle', label: 'Circle' },
     { mode: 'discrete', label: 'Discrete' },
     /*{ mode: 'continuous', label: 'Continuous' },*/
-    /*{ mode: 'scrolling', label: 'Scroll' },*/
     /*{ mode: 'drilling', label: 'Drilling' },*/
 ];
 
@@ -64,7 +62,6 @@ export default function MovementPanel({
     discrete,
     drilling,
     circle,
-    scrolling,
     gcode,
 }: {
     connected: boolean;
@@ -96,12 +93,6 @@ export default function MovementPanel({
         setOrigin: () => void;
         angle: number;
         setAngle: (value: number) => void;
-    };
-    scrolling: {
-        axis: Axis;
-        setAxis: (axis: Axis) => void;
-        distance: number;
-        setDistance: (value: number) => void;
     };
     gcode: {
         packets: GcodePacket[];
@@ -149,16 +140,6 @@ export default function MovementPanel({
                                 setAngle={circle.setAngle}
                                 speed={feedRate}
                                 setSpeed={setFeedRate}
-                            />
-                        )}
-                        {mode === 'scrolling' && (
-                            <ScrollingControls
-                                ready={ready}
-                                axis={scrolling.axis}
-                                setAxis={scrolling.setAxis}
-                                distance={scrolling.distance}
-                                setDistance={scrolling.setDistance}
-                                stopSignal={pressed.has('Space')}
                             />
                         )}
                         {mode === 'drilling' && (
