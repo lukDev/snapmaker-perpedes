@@ -12,6 +12,15 @@ Manual control application for Snapmaker machines.
 4. Click "Home" (skips actual homing if that has already happened).
 5. Enjoy your manual control :)
 
+### Disclaimer
+
+This code has been tested on a Snapmaker 2.0 A350T.
+It should also work on other 2.0 machines and the Artisan, but this has never been verified.
+
+In general:
+
+> Use at your own risk!
+
 ### Nudge Keys
 
 Independent of the selected mode, the keys 1-8 (digit row or numpad) always nudge the machine by a fixed increment:
@@ -28,14 +37,11 @@ Intended for use with a CNC jog wheel / macro pad that emits these keys.
 
 ### Modes
 
-#### Continuous
+#### G-Code
 
-By holding the button(s) shown in the UI, the machine will move in the specified directions at the set speed.
-
-#### Discrete
-
-Set the speed and distance in the UI.
-By pressing a button, the machine will move the set distance at the set speed in the corresponding direction.
+Enter G-Code manually (one or more lines) and send it with the button or Cmd/Ctrl+Enter.
+Everything sent during the current session is listed on the left along with its state (new / in execution / executed / failed).
+Clicking a previous entry copies its code back into the editor.
 
 #### Circle
 
@@ -43,25 +49,10 @@ Like discrete mode, but circular.
 After setting the angle and speed and pressing CCW or CW, the machine will move along an arc around the work origin (in X and Y).
 The current radius (calculated based on the work origin and current position) is shown in the UI.
 
-#### Drilling
+#### Discrete
 
-Allows for drill-press-like behaviour.
-After setting the max depth and up and down speeds, pressing Z- moves the toolhead down and releasing it automatically moves it back up.
-
-#### G-Code
-
-Enter G-Code manually (one or more lines) and send it with the button or Cmd/Ctrl+Enter.
-Everything sent during the current session is listed on the left along with its state (new / in execution / executed / failed).
-Clicking a previous entry copies its code back into the editor.
-
-### Disclaimer
-
-This code has been tested on a Snapmaker 2.0 A350T.
-It should also work on other 2.0 machines and the Artisan, but this has never been verified.
-
-In general:
-
-> Use at your own risk!
+Set the speed and distance in the UI.
+By pressing a button, the machine will move the set distance at the set speed in the corresponding direction.
 
 ## Technical Details
 
