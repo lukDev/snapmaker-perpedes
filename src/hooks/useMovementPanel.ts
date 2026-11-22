@@ -50,7 +50,7 @@ export function useMovementPanel() {
     } = useSerial();
     const ready = connected && homed;
 
-    const [mode, setModeState] = useState<MovementMode>('continuous');
+    const [mode, setModeState] = useState<MovementMode>('gcode');
     const [feedRate, setFeedRate] = useState(DEFAULT_FEED_RATE);
     const [discreteDistance, setDiscreteDistance] = useState(
         DEFAULT_DISCRETE_DISTANCE

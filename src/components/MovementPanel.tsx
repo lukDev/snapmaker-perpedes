@@ -98,22 +98,16 @@ export default function MovementPanel({
 }): ReactNode {
     const ready = connected && homed;
 
-    return (
-        <div className="flex h-full flex-col items-center justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-            <ModeTabs mode={mode} setMode={setMode} />
-
-            <div className="flex h-full flex-col overflow-y-auto p-10">
-                <div className="my-auto flex flex-col items-center gap-8">
-                    <div className="flex w-full flex-col items-center gap-6">
-                        {mode === 'continuous' && (
+    const controls: Record<MovementMode, ReactNode> = {
+                        continuous: (
                             <ContinuousJogControls
                                 pressed={pressed}
                                 ready={ready}
                                 speed={feedRate}
                                 setSpeed={setFeedRate}
                             />
-                        )}
-                        {mode === 'discrete' && (
+                        ),
+                        discrete: (
                             <DiscreteJogControls
                                 pressed={pressed}
                                 ready={ready}
@@ -122,8 +116,8 @@ export default function MovementPanel({
                                 speed={feedRate}
                                 setSpeed={setFeedRate}
                             />
-                        )}
-                        {mode === 'circle' && (
+                        ),
+                        circle: (
                             <CircleControls
                                 pressed={pressed}
                                 ready={ready}
@@ -134,8 +128,8 @@ export default function MovementPanel({
                                 speed={feedRate}
                                 setSpeed={setFeedRate}
                             />
-                        )}
-                        {mode === 'drilling' && (
+                        ),
+                        drilling: (
                             <DrillingControls
                                 pressed={pressed}
                                 ready={ready}
@@ -148,8 +142,8 @@ export default function MovementPanel({
                                 status={drilling.status}
                                 descended={drilling.descended}
                             />
-                        )}
-                        {mode === 'gcode' && (
+                        ),
+                        gcode: (
                             <GcodeControls
                                 ready={ready}
                                 packets={gcode.packets}
@@ -159,8 +153,31 @@ export default function MovementPanel({
                                 send={gcode.send}
                                 reuse={gcode.reuse}
                             />
-                        )}
-                    </div>
+                        ),
+    };
+
+    return (
+        <div className="flex min-h-0 flex-1 flex-col items-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+            <ModeTabs mode={mode} setMode={setMode} />
+
+            <div className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto p-10">
+                {/* every selectable mode is rendered into the same grid cell so
+                    the panel is always as wide as the widest one; inactive modes
+                    are collapsed to zero height and hidden */}
+                <div className="my-auto grid w-full">
+                    {MODES.map(({ mode: candidate }) => (
+                        <div
+                            key={candidate}
+                            inert={mode !== candidate}
+                            aria-hidden={mode !== candidate}
+                            className={`col-start-1 row-start-1 flex w-full flex-col items-center gap-6 ${
+                                mode === candidate
+                                    ? ''
+                                    : 'invisible h-0 overflow-hidden'
+                            }`}>
+                            {controls[candidate]}
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>

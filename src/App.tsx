@@ -28,8 +28,12 @@ function ControlPanels(): ReactNode {
     } = useMovementPanel();
 
     return (
-        <div className="flex h-full items-center gap-6">
-            <MovementPanel
+        <div className="flex items-stretch gap-6">
+            {/* zero-height inner box so the movement panel never dictates the
+                row height; it stretches to match the control stack instead */}
+            <div>
+                <div className="flex h-0 min-h-full flex-col">
+                    <MovementPanel
                 connected={connected}
                 homed={homed}
                 mode={mode}
@@ -43,6 +47,8 @@ function ControlPanels(): ReactNode {
                 circle={circle}
                 gcode={gcode}
             />
+                </div>
+            </div>
             <div className="flex flex-col items-stretch gap-6">
                 <SpindlePanel />
                 <PositionPanel
