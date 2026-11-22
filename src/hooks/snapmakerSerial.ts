@@ -303,12 +303,20 @@ export function useSnapmakerSerial() {
         [sendGcodeAndWaitForAck]
     );
 
+    // moves the given axes (default: all) to their work origin; X/Y first,
+    // then Z, so workholding in the XY path is cleared before plunging
     const goToOrigin = useCallback(
-        async (feedRate: number) => {
+        async (feedRate: number, axes: Axis[] = ['X', 'Y', 'Z']) => {
             if (!writerRef.current || !workPositionRef.current) return;
+            const planar = axes.filter(axis => axis !== 'Z');
+            if (planar.length === 0 && !axes.includes('Z')) return;
             await ensureAbsoluteMode();
-            await sendGcodeAndWaitForAck(`G1 X0 Y0 F${feedRate}`);
-            await sendGcodeAndWaitForAck(`G1 Z0 F${feedRate}`);
+            if (planar.length > 0)
+                await sendGcodeAndWaitForAck(
+                    ['G1', ...planar.map(axis => `${axis}0`), `F${feedRate}`].join(' ')
+                );
+            if (axes.includes('Z'))
+                await sendGcodeAndWaitForAck(`G1 Z0 F${feedRate}`);
         },
         [sendGcodeAndWaitForAck, ensureAbsoluteMode]
     );

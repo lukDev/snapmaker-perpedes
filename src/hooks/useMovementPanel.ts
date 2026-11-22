@@ -178,7 +178,7 @@ export function useMovementPanel() {
     const pressed = useTrackedKeys(ready, onKeyDown, onKeyUp, stopAll);
 
     const goToOriginAtFeedRate = useCallback(
-        () => goToOrigin(MAX_FEED_RATE),
+        (axes?: Axis[]) => goToOrigin(MAX_FEED_RATE, axes),
         [goToOrigin]
     );
 

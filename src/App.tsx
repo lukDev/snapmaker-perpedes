@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import MovementPanel from './components/MovementPanel.tsx';
 import SpindlePanel from './components/SpindlePanel.tsx';
 import StopPanel from './components/StopPanel.tsx';
+import PositionPanel from './components/PositionPanel.tsx';
 import ConnectionStatus from './components/ConnectionStatus.tsx';
 import StatusBanner from './components/StatusBanner.tsx';
 import { SerialProvider } from './context/SerialContext.tsx';
@@ -37,9 +38,6 @@ function ControlPanels(): ReactNode {
                 setFeedRate={setFeedRate}
                 pressed={pressed}
                 workPosition={workPosition}
-                machinePosition={machinePosition}
-                setWorkOrigin={setWorkOrigin}
-                goToOrigin={goToOrigin}
                 discrete={discrete}
                 drilling={drilling}
                 circle={circle}
@@ -47,6 +45,13 @@ function ControlPanels(): ReactNode {
             />
             <div className="flex flex-col items-stretch gap-6">
                 <SpindlePanel />
+                <PositionPanel
+                    ready={connected && homed}
+                    workPosition={workPosition}
+                    machinePosition={machinePosition}
+                    setWorkOrigin={setWorkOrigin}
+                    goToOrigin={goToOrigin}
+                />
                 <StopPanel
                     connected={connected && homed}
                     active={pressed.has('Space')}

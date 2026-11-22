@@ -3,9 +3,8 @@ import DiscreteJogControls from './modes/DiscreteJogControls.tsx';
 import DrillingControls from './modes/DrillingControls.tsx';
 import CircleControls from './modes/CircleControls.tsx';
 import GcodeControls from './modes/GcodeControls.tsx';
-import PositionPanel from './PositionPanel';
 import type { TrackedKey } from '../hooks/useTrackedKeys';
-import type { Axis, AxisPosition } from '../hooks/snapmakerSerial';
+import type { AxisPosition } from '../hooks/snapmakerSerial';
 import type { MovementMode } from '../hooks/useMovementPanel';
 import type { DrillingStatus } from '../hooks/drillingControl';
 import type { GcodePacket } from '../hooks/gcodeConsole';
@@ -56,9 +55,6 @@ export default function MovementPanel({
     setFeedRate,
     pressed,
     workPosition,
-    machinePosition,
-    setWorkOrigin,
-    goToOrigin,
     discrete,
     drilling,
     circle,
@@ -72,9 +68,6 @@ export default function MovementPanel({
     setFeedRate: (value: number) => void;
     pressed: Set<TrackedKey>;
     workPosition: AxisPosition | null;
-    machinePosition: AxisPosition | null;
-    setWorkOrigin: (axes: Axis[]) => void;
-    goToOrigin: () => void;
     discrete: {
         distance: number;
         setDistance: (value: number) => void;
@@ -168,16 +161,6 @@ export default function MovementPanel({
                             />
                         )}
                     </div>
-
-                    <div className="h-px w-full bg-slate-200" />
-
-                    <PositionPanel
-                        ready={ready}
-                        workPosition={workPosition}
-                        machinePosition={machinePosition}
-                        setWorkOrigin={setWorkOrigin}
-                        goToOrigin={goToOrigin}
-                    />
                 </div>
             </div>
         </div>
