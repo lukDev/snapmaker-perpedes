@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useSerial } from '../hooks/useSerial';
 import { SUPPORTED_SPINDLE_TOOLHEAD } from '../hooks/snapmakerSerial';
 
@@ -14,6 +14,26 @@ function SpeedControl({
     onChange: (value: number) => void;
     disabled: boolean;
 }): ReactNode {
+    const [text, setText] = useState(String(value));
+    const [prevValue, setPrevValue] = useState(value);
+
+    if (value !== prevValue) {
+        setPrevValue(value);
+        setText(String(value));
+    }
+
+    const commit = () => {
+        const parsed = parseInt(text.replace(/\D/g, ''), 10);
+        const next = Number.isNaN(parsed)
+            ? value
+            : Math.min(
+                  MAX_SPINDLE_SPEED_RPM,
+                  Math.max(MIN_SPINDLE_SPEED_RPM, parsed)
+              );
+        setText(String(next));
+        if (next !== value) onChange(next);
+    };
+
     return (
         <div className="flex w-64 flex-col items-center gap-2">
             <span className="text-sm font-medium text-slate-500">
@@ -33,21 +53,12 @@ function SpeedControl({
                 <input
                     type="text"
                     inputMode="numeric"
-                    value={value}
+                    value={text}
                     disabled={disabled}
-                    onChange={e => {
-                        const parsed = Number(
-                            e.target.value.replace(/\D/g, '')
-                        );
-                        onChange(
-                            Math.min(
-                                MAX_SPINDLE_SPEED_RPM,
-                                Math.max(
-                                    MIN_SPINDLE_SPEED_RPM,
-                                    Number.isNaN(parsed) ? value : parsed
-                                )
-                            )
-                        );
+                    onChange={e => setText(e.target.value.replace(/\D/g, ''))}
+                    onBlur={commit}
+                    onKeyDown={e => {
+                        if (e.key === 'Enter') e.currentTarget.blur();
                     }}
                     className="w-20 rounded-md border border-slate-300 bg-white px-2 py-1 text-right focus:border-emerald-700 focus:outline-none disabled:opacity-40"
                 />
