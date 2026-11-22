@@ -1,9 +1,12 @@
 import { useState, type ReactNode } from 'react';
 import { useSerial } from '../hooks/useSerial';
 import { SUPPORTED_SPINDLE_TOOLHEAD } from '../hooks/snapmakerSerial';
+import { PresetButton } from './utils/PresetOptions.tsx';
 
 const MIN_SPINDLE_SPEED_RPM = 8000;
 const MAX_SPINDLE_SPEED_RPM = 18000;
+const SPINDLE_SPEED_PRESETS = [8000, 12000, 18000];
+const SLIDER_THUMB_WIDTH_PX = 16;
 
 function SpeedControl({
     value,
@@ -39,16 +42,38 @@ function SpeedControl({
             <span className="text-sm font-medium text-slate-500">
                 Spindle Speed
             </span>
-            <input
-                type="range"
-                min={MIN_SPINDLE_SPEED_RPM}
-                max={MAX_SPINDLE_SPEED_RPM}
-                step={1}
-                value={value}
-                disabled={disabled}
-                onChange={e => onChange(Number(e.target.value))}
-                className="w-full accent-emerald-700 disabled:opacity-40"
-            />
+            <div className="w-full">
+                <input
+                    type="range"
+                    min={MIN_SPINDLE_SPEED_RPM}
+                    max={MAX_SPINDLE_SPEED_RPM}
+                    step={1}
+                    value={value}
+                    disabled={disabled}
+                    onChange={e => onChange(Number(e.target.value))}
+                    className="w-full accent-emerald-700 disabled:opacity-40"
+                />
+                <div className="relative h-4">
+                    {SPINDLE_SPEED_PRESETS.map(preset => {
+                        const fraction =
+                            (preset - MIN_SPINDLE_SPEED_RPM) /
+                            (MAX_SPINDLE_SPEED_RPM - MIN_SPINDLE_SPEED_RPM);
+                        return (
+                            <PresetButton
+                                key={preset}
+                                preset={preset}
+                                onChange={onChange}
+                                disabled={disabled}
+                                className="absolute top-0 -translate-x-1/2"
+                                style={{
+                                    // the thumb's center travels from half a thumb width to (100% - half a thumb width)
+                                    left: `calc(${SLIDER_THUMB_WIDTH_PX / 2}px + ${fraction} * (100% - ${SLIDER_THUMB_WIDTH_PX}px))`,
+                                }}
+                            />
+                        );
+                    })}
+                </div>
+            </div>
             <div className="flex items-baseline gap-1.5 font-mono text-lg text-slate-700 tabular-nums">
                 <input
                     type="text"
