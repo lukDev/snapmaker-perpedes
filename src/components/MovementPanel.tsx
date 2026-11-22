@@ -13,12 +13,12 @@ import type { GcodePacket } from '../hooks/gcodeConsole';
 import ContinuousJogControls from './modes/ContinuousJogControls.tsx';
 
 const MODES: { mode: MovementMode; label: string }[] = [
-    { mode: 'continuous', label: 'Continuous' },
-    { mode: 'discrete', label: 'Discrete' },
-    { mode: 'circle', label: 'Circle' },
-    { mode: 'scrolling', label: 'Scroll' },
-    { mode: 'drilling', label: 'Drilling' },
     { mode: 'gcode', label: 'G-Code' },
+    { mode: 'circle', label: 'Circle' },
+    { mode: 'discrete', label: 'Discrete' },
+    /*{ mode: 'continuous', label: 'Continuous' },*/
+    /*{ mode: 'scrolling', label: 'Scroll' },*/
+    /*{ mode: 'drilling', label: 'Drilling' },*/
 ];
 
 function ModeTabs({
