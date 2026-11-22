@@ -4,6 +4,7 @@ import type { TrackedKey } from '../../hooks/useTrackedKeys.ts';
 import type { AxisPosition } from '../../hooks/snapmakerSerial.ts';
 import FeedRateInput from '../utils/FeedRateInput.tsx';
 import NumberField from '../utils/NumberField.tsx';
+import { ANGLE_PRESETS } from '../utils/PresetOptions.tsx';
 
 // the circle's center is always the work origin (0,0) — radius is just the
 // current work position's distance from it
@@ -59,6 +60,7 @@ export default function CircleControls({
             <div className="flex w-full flex-col gap-2">
                 <NumberField
                     label="Angle"
+                    presets={ANGLE_PRESETS}
                     value={angle}
                     onChange={setAngle}
                     unit="deg"

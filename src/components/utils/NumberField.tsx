@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import NamedUnitField from './NamedUnitField.tsx';
+import PresetOptions from './PresetOptions.tsx';
 
 function clamp(value: number, min: number, max: number): number {
     return Math.min(max, Math.max(min, value));
@@ -13,6 +14,7 @@ export default function NumberField({
     min,
     max,
     decimals = 2,
+    presets,
 }: {
     label: string;
     value: number;
@@ -21,6 +23,7 @@ export default function NumberField({
     min: number;
     max: number;
     decimals?: number;
+    presets?: number[];
 }): ReactNode {
     const [text, setText] = useState(value.toFixed(decimals));
     const [prevValue, setPrevValue] = useState(value);
@@ -52,6 +55,11 @@ export default function NumberField({
                     }}
                     className="w-16 rounded-md border border-slate-300 bg-white px-2 py-1 text-right font-mono text-sm text-slate-700 tabular-nums focus:border-emerald-400 focus:outline-none"
                 />
+            }
+            below={
+                presets && (
+                    <PresetOptions presets={presets} onChange={commit} />
+                )
             }
         />
     );

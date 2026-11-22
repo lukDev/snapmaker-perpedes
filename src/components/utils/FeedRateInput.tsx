@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { MAX_FEED_RATE } from '../../hooks/jogControl.ts';
 import NamedUnitField from './NamedUnitField.tsx';
+import PresetOptions from './PresetOptions.tsx';
 
 const PRESETS = [50, 100, 300, 500, 1000, MAX_FEED_RATE];
 const MIN = 10;
@@ -47,26 +48,6 @@ function FeedRateNumberInput({
     );
 }
 
-function FeedRatePresets({
-    onChange,
-}: {
-    onChange: (value: number) => void;
-}): ReactNode {
-    return (
-        <div className="ml-1 flex items-center gap-0.5">
-            {PRESETS.map(preset => (
-                <button
-                    key={preset}
-                    type="button"
-                    onClick={() => onChange(preset)}
-                    className="rounded cursor-pointer px-1 font-mono text-[11px] leading-4 text-slate-400 tabular-nums transition-colors hover:bg-slate-100 hover:text-slate-600">
-                    {preset}
-                </button>
-            ))}
-        </div>
-    );
-}
-
 export default function FeedRateInput({
     value,
     onChange,
@@ -79,7 +60,7 @@ export default function FeedRateInput({
             label="Speed"
             unit="mm/min"
             input={<FeedRateNumberInput value={value} onChange={onChange} />}
-            below={<FeedRatePresets onChange={onChange} />}
+            below={<PresetOptions presets={PRESETS} onChange={onChange} />}
         />
     );
 }

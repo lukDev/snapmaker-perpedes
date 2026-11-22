@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Key } from '../utils/KeyBadge.tsx';
 import NumberField from '../utils/NumberField.tsx';
+import { DISTANCE_PRESETS } from '../utils/PresetOptions.tsx';
 import { MAX_FEED_RATE } from '../../hooks/jogControl.ts';
 import type { TrackedKey } from '../../hooks/useTrackedKeys.ts';
 import type { DrillingStatus } from '../../hooks/drillingControl.ts';
@@ -50,6 +51,7 @@ export default function DrillingControls({
             <div className="flex w-full flex-col gap-2">
                 <NumberField
                     label="Max Depth"
+                    presets={DISTANCE_PRESETS}
                     value={maxDepth}
                     onChange={setMaxDepth}
                     unit="mm"

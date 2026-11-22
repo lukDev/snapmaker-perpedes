@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { WasdArrowGrid } from '../utils/KeyBadge.tsx';
 import NumberField from '../utils/NumberField.tsx';
+import { ANGLE_PRESETS, DISTANCE_PRESETS } from '../utils/PresetOptions.tsx';
 import type { TrackedKey } from '../../hooks/useTrackedKeys.ts';
 import FeedRateInput from '../utils/FeedRateInput.tsx';
 
@@ -32,6 +33,7 @@ export default function DiscreteJogControls({
             <div className="flex w-full flex-col gap-2">
                 <NumberField
                     label="Distance"
+                    presets={DISTANCE_PRESETS}
                     value={distance}
                     onChange={setDistance}
                     unit="mm"
@@ -41,6 +43,7 @@ export default function DiscreteJogControls({
                 />
                 <NumberField
                     label="Rotation"
+                    presets={ANGLE_PRESETS}
                     value={rotation}
                     onChange={setRotation}
                     unit="deg"
