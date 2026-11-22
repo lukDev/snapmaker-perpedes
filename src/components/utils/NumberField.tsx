@@ -57,9 +57,7 @@ export default function NumberField({
                 />
             }
             below={
-                presets && (
-                    <PresetOptions presets={presets} onChange={commit} />
-                )
+                presets && <PresetOptions presets={presets} onChange={commit} />
             }
         />
     );

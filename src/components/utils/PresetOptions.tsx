@@ -22,7 +22,7 @@ export function PresetButton({
             disabled={disabled}
             onClick={() => onChange(preset)}
             style={style}
-            className={`rounded cursor-pointer disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-400 px-1 font-mono text-[11px] leading-4 text-slate-400 tabular-nums transition-colors hover:bg-slate-100 hover:text-slate-600 ${className}`}>
+            className={`cursor-pointer rounded px-1 font-mono text-[11px] leading-4 text-slate-400 tabular-nums transition-colors hover:bg-slate-100 hover:text-slate-600 disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-400 ${className}`}>
             {preset}
         </button>
     );
