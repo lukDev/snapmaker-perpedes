@@ -9,6 +9,8 @@ export const TRACKED_KEYS = [
     'KeyE',
     'ArrowUp',
     'ArrowDown',
+    'ArrowLeft',
+    'ArrowRight',
     'Space',
 ] as const;
 export type TrackedKey = (typeof TRACKED_KEYS)[number];
@@ -22,6 +24,8 @@ export const KEY_LABELS: Record<TrackedKey, string> = {
     KeyE: 'CW',
     ArrowUp: 'Z+',
     ArrowDown: 'Z-',
+    ArrowLeft: 'B-',
+    ArrowRight: 'B+',
     Space: 'STOP',
 };
 
@@ -34,6 +38,8 @@ export const KEY_NAMES: Record<TrackedKey, string> = {
     KeyE: 'E',
     ArrowUp: 'Up',
     ArrowDown: 'Down',
+    ArrowLeft: 'Left',
+    ArrowRight: 'Right',
     Space: 'Space',
 };
 

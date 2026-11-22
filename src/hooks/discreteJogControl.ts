@@ -1,18 +1,25 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useSerial } from './useSerial';
-import type { Axis, Direction } from './jogControl';
+import type { Direction } from './jogControl';
+import type { Axis } from './snapmakerSerial';
 
+// `distance` (mm) applies to the linear axes, `rotation` (degrees) to B
 export function useDiscreteJogControl(
     enabled: boolean,
     distance: number,
+    rotation: number,
     speed: number
 ) {
     const { sendGcodeAndWaitForAck, ensureRelativeMode } = useSerial();
     const distanceRef = useRef(distance);
+    const rotationRef = useRef(rotation);
     const speedRef = useRef(speed);
     useEffect(() => {
         distanceRef.current = distance;
     }, [distance]);
+    useEffect(() => {
+        rotationRef.current = rotation;
+    }, [rotation]);
     useEffect(() => {
         speedRef.current = speed;
     }, [speed]);
@@ -24,7 +31,9 @@ export function useDiscreteJogControl(
         (axis: Axis, direction: Direction) => {
             if (!enabled) return;
             queueRef.current = queueRef.current.then(async () => {
-                const delta = distanceRef.current * direction;
+                const step =
+                    axis === 'B' ? rotationRef.current : distanceRef.current;
+                const delta = step * direction;
                 await ensureRelativeMode();
                 await sendGcodeAndWaitForAck(
                     `G1 ${axis}${delta.toFixed(3)} F${speedRef.current}`

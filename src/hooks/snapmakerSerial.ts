@@ -1,13 +1,20 @@
 import { useCallback, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 
-export type Axis = 'X' | 'Y' | 'Z';
-export type AxisPosition = { x: number; y: number; z: number };
+// B is the rotary axis (degrees); X/Y/Z are linear (mm)
+export type Axis = 'X' | 'Y' | 'Z' | 'B';
+export type AxisPosition = { x: number; y: number; z: number; b: number };
+
+export const ALL_AXES: Axis[] = ['X', 'Y', 'Z', 'B'];
 
 const POSITION_REPORT_RE =
     /^X:(-?\d+\.?\d*)\s+Y:(-?\d+\.?\d*)\s+Z:(-?\d+\.?\d*)/;
+// B isn't at a fixed position in the report (E may precede it), and the
+// trailing "Count ..." section repeats axis letters in steps, so only the
+// part before "Count" is searched
+const B_REPORT_RE = /\bB:(-?\d+\.?\d*)/;
 
-const ZERO_POSITION: AxisPosition = { x: 0, y: 0, z: 0 };
+const ZERO_POSITION: AxisPosition = { x: 0, y: 0, z: 0, b: 0 };
 
 // Snapmaker's firmware doesn't implement M154 (position auto-report), so
 // position updates are obtained by polling M114 on an interval instead.
@@ -67,10 +74,12 @@ export function useSnapmakerSerial() {
     const applyPositionReport = (line: string) => {
         const match = POSITION_REPORT_RE.exec(line);
         if (!match) return;
+        const bMatch = B_REPORT_RE.exec(line.split('Count')[0]);
         const work: AxisPosition = {
             x: parseFloat(match[1]),
             y: parseFloat(match[2]),
             z: parseFloat(match[3]),
+            b: bMatch ? parseFloat(bMatch[1]) : 0,
         };
         workPositionRef.current = work;
         // Runs from the detached background read loop, outside any React
@@ -294,12 +303,13 @@ export function useSnapmakerSerial() {
     );
 
     // moves the given axes (default: all) to their work origin; X/Y first,
-    // then Z, so workholding in the XY path is cleared before plunging
+    // then B, then Z, so workholding in the XY path is cleared and the
+    // workpiece is rotated before plunging
     const goToOrigin = useCallback(
-        async (feedRate: number, axes: Axis[] = ['X', 'Y', 'Z']) => {
+        async (feedRate: number, axes: Axis[] = ALL_AXES) => {
             if (!writerRef.current || !workPositionRef.current) return;
-            const planar = axes.filter(axis => axis !== 'Z');
-            if (planar.length === 0 && !axes.includes('Z')) return;
+            if (axes.length === 0) return;
+            const planar = axes.filter(axis => axis === 'X' || axis === 'Y');
             await ensureAbsoluteMode();
             if (planar.length > 0)
                 await sendGcodeAndWaitForAck(
@@ -309,6 +319,8 @@ export function useSnapmakerSerial() {
                         `F${feedRate}`,
                     ].join(' ')
                 );
+            if (axes.includes('B'))
+                await sendGcodeAndWaitForAck(`G1 B0 F${feedRate}`);
             if (axes.includes('Z'))
                 await sendGcodeAndWaitForAck(`G1 Z0 F${feedRate}`);
         },

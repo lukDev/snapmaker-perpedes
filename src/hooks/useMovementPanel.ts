@@ -2,9 +2,10 @@ import { useCallback, useState } from 'react';
 import {
     useJogControl,
     MAX_FEED_RATE,
-    type Axis,
+    type Axis as LinearAxis,
     type Direction,
 } from './jogControl';
+import type { Axis } from './snapmakerSerial';
 import { useDiscreteJogControl } from './discreteJogControl';
 import { useDrillingControl } from './drillingControl';
 import { useCircleControl } from './circleControl';
@@ -18,13 +19,14 @@ export type MovementMode =
 
 const DEFAULT_FEED_RATE = 300;
 const DEFAULT_DISCRETE_DISTANCE = 1;
+const DEFAULT_DISCRETE_ROTATION = 5;
 const DEFAULT_CIRCLE_ANGLE = 15;
 const DEFAULT_MAX_DEPTH = 5;
 const DEFAULT_DOWN_SPEED = 100;
 const DEFAULT_UP_SPEED = 300;
 
 const KEY_TO_AXIS: Partial<
-    Record<TrackedKey, { axis: Axis; direction: Direction }>
+    Record<TrackedKey, { axis: LinearAxis; direction: Direction }>
 > = {
     KeyD: { axis: 'X', direction: 1 },
     KeyA: { axis: 'X', direction: -1 },
@@ -32,6 +34,14 @@ const KEY_TO_AXIS: Partial<
     KeyS: { axis: 'Y', direction: 1 },
     ArrowUp: { axis: 'Z', direction: 1 },
     ArrowDown: { axis: 'Z', direction: -1 },
+};
+
+// rotary B axis — only discrete mode drives it
+const KEY_TO_ROTARY: Partial<
+    Record<TrackedKey, { axis: Axis; direction: Direction }>
+> = {
+    ArrowRight: { axis: 'B', direction: 1 },
+    ArrowLeft: { axis: 'B', direction: -1 },
 };
 
 export function useMovementPanel() {
@@ -50,6 +60,9 @@ export function useMovementPanel() {
     const [discreteDistance, setDiscreteDistance] = useState(
         DEFAULT_DISCRETE_DISTANCE
     );
+    const [discreteRotation, setDiscreteRotation] = useState(
+        DEFAULT_DISCRETE_ROTATION
+    );
     const [circleAngle, setCircleAngle] = useState(DEFAULT_CIRCLE_ANGLE);
     const [maxDepth, setMaxDepth] = useState(DEFAULT_MAX_DEPTH);
     const [downSpeed, setDownSpeed] = useState(DEFAULT_DOWN_SPEED);
@@ -67,7 +80,12 @@ export function useMovementPanel() {
 
     const discreteEnabled = ready && mode === 'discrete';
     const { trigger: discreteTrigger, cancel: discreteCancel } =
-        useDiscreteJogControl(discreteEnabled, discreteDistance, feedRate);
+        useDiscreteJogControl(
+            discreteEnabled,
+            discreteDistance,
+            discreteRotation,
+            feedRate
+        );
 
     const drillingEnabled = ready && mode === 'drilling';
     const {
@@ -130,7 +148,7 @@ export function useMovementPanel() {
                     break;
                 }
                 case 'discrete': {
-                    const mapping = KEY_TO_AXIS[code];
+                    const mapping = KEY_TO_AXIS[code] ?? KEY_TO_ROTARY[code];
                     if (mapping)
                         discreteTrigger(mapping.axis, mapping.direction);
                     break;
@@ -202,6 +220,8 @@ export function useMovementPanel() {
         discrete: {
             distance: discreteDistance,
             setDistance: setDiscreteDistance,
+            rotation: discreteRotation,
+            setRotation: setDiscreteRotation,
             speed: feedRate,
             setSpeed: setFeedRate,
         },

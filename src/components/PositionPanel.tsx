@@ -1,11 +1,15 @@
 import type { ReactNode } from 'react';
 import { CrosshairIcon } from './utils/KeyBadge.tsx';
-import type { Axis, AxisPosition } from '../hooks/snapmakerSerial';
+import {
+    ALL_AXES,
+    type Axis,
+    type AxisPosition,
+} from '../hooks/snapmakerSerial';
 
-const AXES: Axis[] = ['X', 'Y', 'Z'];
-
-function formatCoord(value: number | undefined): string {
-    return value === undefined ? '?' : value.toFixed(2);
+// B is rotary, so its position is shown in degrees
+function formatCoord(axis: Axis, value: number | undefined): string {
+    if (value === undefined) return '?';
+    return axis === 'B' ? `${value.toFixed(2)}°` : value.toFixed(2);
 }
 
 function PinIcon({ className }: { className?: string }): ReactNode {
@@ -44,7 +48,7 @@ function PositionColumn({
                 {axis}
             </span>
             <span className="font-mono text-sm text-slate-700 tabular-nums">
-                {formatCoord(workPosition?.[key])}
+                {formatCoord(axis, workPosition?.[key])}
             </span>
             <button
                 type="button"
@@ -82,8 +86,8 @@ export default function PositionPanel({
     const originActionsDisabled = !ready || !workPosition;
     return (
         <div className="flex w-full flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
-            <div className="flex w-full items-center justify-center gap-4">
-                {AXES.map(axis => (
+            <div className="flex w-full flex-wrap items-center justify-center gap-4">
+                {ALL_AXES.map(axis => (
                     <PositionColumn
                         key={axis}
                         axis={axis}
@@ -98,7 +102,7 @@ export default function PositionPanel({
                 <button
                     type="button"
                     disabled={originActionsDisabled}
-                    onClick={() => setWorkOrigin(AXES)}
+                    onClick={() => setWorkOrigin(ALL_AXES)}
                     className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-100 disabled:pointer-events-none disabled:opacity-40">
                     <CrosshairIcon className="h-4 w-4" />
                     Set Work Origin

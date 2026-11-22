@@ -71,6 +71,8 @@ export default function MovementPanel({
     discrete: {
         distance: number;
         setDistance: (value: number) => void;
+        rotation: number;
+        setRotation: (value: number) => void;
     };
     drilling: {
         maxDepth: number;
@@ -113,6 +115,8 @@ export default function MovementPanel({
                 ready={ready}
                 distance={discrete.distance}
                 setDistance={discrete.setDistance}
+                rotation={discrete.rotation}
+                setRotation={discrete.setRotation}
                 speed={feedRate}
                 setSpeed={setFeedRate}
             />

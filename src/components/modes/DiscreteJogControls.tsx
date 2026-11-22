@@ -9,6 +9,8 @@ export default function DiscreteJogControls({
     ready,
     distance,
     setDistance,
+    rotation,
+    setRotation,
     speed,
     setSpeed,
 }: {
@@ -16,6 +18,8 @@ export default function DiscreteJogControls({
     ready: boolean;
     distance: number;
     setDistance: (value: number) => void;
+    rotation: number;
+    setRotation: (value: number) => void;
     speed: number;
     setSpeed: (value: number) => void;
 }): ReactNode {
@@ -23,7 +27,7 @@ export default function DiscreteJogControls({
         <>
             <div
                 className={`transition-opacity ${ready ? '' : 'pointer-events-none opacity-40'}`}>
-                <WasdArrowGrid pressed={pressed} />
+                <WasdArrowGrid pressed={pressed} rotary />
             </div>
             <div className="flex w-full flex-col gap-2">
                 <NumberField
@@ -34,6 +38,15 @@ export default function DiscreteJogControls({
                     min={0.01}
                     max={100}
                     decimals={2}
+                />
+                <NumberField
+                    label="Rotation"
+                    value={rotation}
+                    onChange={setRotation}
+                    unit="deg"
+                    min={0.1}
+                    max={360}
+                    decimals={1}
                 />
                 <FeedRateInput value={speed} onChange={setSpeed} />
             </div>

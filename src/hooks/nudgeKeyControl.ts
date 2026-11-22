@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useSerial } from './useSerial';
 import { MAX_FEED_RATE, type Direction } from './jogControl';
-
-// includes the rotary B axis, which none of the other movers drive
-type NudgeAxis = 'X' | 'Y' | 'Z' | 'B';
+import type { Axis as NudgeAxis } from './snapmakerSerial';
 
 // mm for linear axes, degrees for B
 const INCREMENTS: Record<NudgeAxis, number> = {

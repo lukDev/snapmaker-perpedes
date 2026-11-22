@@ -48,11 +48,14 @@ export function Key({
 }
 
 // shared WASD (X/Y) + arrow (Z) layout, reused by continuous/discrete/circle
-// jog controls — they only differ in what pressing a key does
+// jog controls — they only differ in what pressing a key does. With `rotary`,
+// left/right arrows (B axis) are shown as well.
 export function WasdArrowGrid({
     pressed,
+    rotary = false,
 }: {
     pressed: Set<TrackedKey>;
+    rotary?: boolean;
 }): ReactNode {
     return (
         <div className="flex items-center gap-10">
@@ -70,7 +73,21 @@ export function WasdArrowGrid({
             <div className="h-24 w-px bg-slate-200" />
             <div className="flex flex-col items-center gap-2">
                 <Key code="ArrowUp" active={pressed.has('ArrowUp')} />
-                <Key code="ArrowDown" active={pressed.has('ArrowDown')} />
+                <div className="flex gap-2">
+                    {rotary && (
+                        <Key
+                            code="ArrowLeft"
+                            active={pressed.has('ArrowLeft')}
+                        />
+                    )}
+                    <Key code="ArrowDown" active={pressed.has('ArrowDown')} />
+                    {rotary && (
+                        <Key
+                            code="ArrowRight"
+                            active={pressed.has('ArrowRight')}
+                        />
+                    )}
+                </div>
             </div>
         </div>
     );
