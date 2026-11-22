@@ -40,7 +40,9 @@ export function useGcodeConsole(enabled: boolean) {
     const busy = packets.some(p => p.status === 'executing');
 
     const updatePacket = (id: number, patch: Partial<GcodePacket>) =>
-        setPackets(prev => prev.map(p => (p.id === id ? { ...p, ...patch } : p)));
+        setPackets(prev =>
+            prev.map(p => (p.id === id ? { ...p, ...patch } : p))
+        );
 
     // a disconnect drops pending acks, so whatever was in flight never resolves
     if (connected !== prevConnected) {

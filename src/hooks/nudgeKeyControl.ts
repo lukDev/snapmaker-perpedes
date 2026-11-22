@@ -13,19 +13,17 @@ const INCREMENTS: Record<NudgeAxis, number> = {
     B: 0.2,
 };
 
-const DIGIT_TO_MOVE: Record<
-    string,
-    { axis: NudgeAxis; direction: Direction }
-> = {
-    '1': { axis: 'X', direction: 1 },
-    '2': { axis: 'X', direction: -1 },
-    '3': { axis: 'Y', direction: 1 },
-    '4': { axis: 'Y', direction: -1 },
-    '5': { axis: 'Z', direction: 1 },
-    '6': { axis: 'Z', direction: -1 },
-    '7': { axis: 'B', direction: 1 },
-    '8': { axis: 'B', direction: -1 },
-};
+const DIGIT_TO_MOVE: Record<string, { axis: NudgeAxis; direction: Direction }> =
+    {
+        '1': { axis: 'X', direction: 1 },
+        '2': { axis: 'X', direction: -1 },
+        '3': { axis: 'Y', direction: 1 },
+        '4': { axis: 'Y', direction: -1 },
+        '5': { axis: 'Z', direction: 1 },
+        '6': { axis: 'Z', direction: -1 },
+        '7': { axis: 'B', direction: 1 },
+        '8': { axis: 'B', direction: -1 },
+    };
 
 // accept both the digit row and the numpad
 function moveForCode(code: string) {

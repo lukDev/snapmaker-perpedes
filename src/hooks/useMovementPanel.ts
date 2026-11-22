@@ -14,11 +14,7 @@ import { useTrackedKeys, type TrackedKey } from './useTrackedKeys';
 import { useSerial } from './useSerial';
 
 export type MovementMode =
-    | 'continuous'
-    | 'discrete'
-    | 'drilling'
-    | 'circle'
-    | 'gcode';
+    'continuous' | 'discrete' | 'drilling' | 'circle' | 'gcode';
 
 const DEFAULT_FEED_RATE = 300;
 const DEFAULT_DISCRETE_DISTANCE = 1;
@@ -43,7 +39,6 @@ export function useMovementPanel() {
         connected,
         homed,
         workPosition,
-        machinePosition,
         setWorkOrigin,
         goToOrigin,
         setSpindleOn,
@@ -104,7 +99,13 @@ export function useMovementPanel() {
         drillingCancel();
         circleCancel();
         nudgeCancel();
-    }, [jogCancelAll, discreteCancel, drillingCancel, circleCancel, nudgeCancel]);
+    }, [
+        jogCancelAll,
+        discreteCancel,
+        drillingCancel,
+        circleCancel,
+        nudgeCancel,
+    ]);
 
     // emergency stop: motion *and* spindle
     const stopAll = useCallback(() => {
@@ -196,7 +197,6 @@ export function useMovementPanel() {
         setFeedRate,
         pressed,
         workPosition,
-        machinePosition,
         setWorkOrigin,
         goToOrigin: goToOriginAtFeedRate,
         discrete: {

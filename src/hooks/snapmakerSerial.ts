@@ -54,9 +54,6 @@ export function useSnapmakerSerial() {
     const [homed, setHomed] = useState(false);
     const [log, setLog] = useState<string[]>([]);
     const [workPosition, setWorkPosition] = useState<AxisPosition | null>(null);
-    const [machinePosition, setMachinePosition] = useState<AxisPosition | null>(
-        null
-    );
     const [spindleOn, setSpindleOnState] = useState(false);
     const [spindleSpeed, setSpindleSpeedState] = useState(
         DEFAULT_SPINDLE_SPEED_RPM
@@ -75,7 +72,6 @@ export function useSnapmakerSerial() {
             y: parseFloat(match[2]),
             z: parseFloat(match[3]),
         };
-        const offset = workOffsetRef.current;
         workPositionRef.current = work;
         // Runs from the detached background read loop, outside any React
         // event, so a plain setState can sit pending until something else
@@ -83,11 +79,6 @@ export function useSnapmakerSerial() {
         // immediately.
         flushSync(() => {
             setWorkPosition(work);
-            setMachinePosition({
-                x: work.x + offset.x,
-                y: work.y + offset.y,
-                z: work.z + offset.z,
-            });
         });
     };
 
@@ -223,7 +214,6 @@ export function useSnapmakerSerial() {
             workOffsetRef.current = ZERO_POSITION;
             workPositionRef.current = null;
             setWorkPosition(null);
-            setMachinePosition(null);
             spindleOnRef.current = false;
             setSpindleOnState(false);
             clearSpindleDebounce();
@@ -313,7 +303,11 @@ export function useSnapmakerSerial() {
             await ensureAbsoluteMode();
             if (planar.length > 0)
                 await sendGcodeAndWaitForAck(
-                    ['G1', ...planar.map(axis => `${axis}0`), `F${feedRate}`].join(' ')
+                    [
+                        'G1',
+                        ...planar.map(axis => `${axis}0`),
+                        `F${feedRate}`,
+                    ].join(' ')
                 );
             if (axes.includes('Z'))
                 await sendGcodeAndWaitForAck(`G1 Z0 F${feedRate}`);
@@ -373,7 +367,6 @@ export function useSnapmakerSerial() {
             setConnected(false);
             setHomed(false);
             setWorkPosition(null);
-            setMachinePosition(null);
             setSpindleOnState(false);
             setToolhead(null);
         }
@@ -393,7 +386,6 @@ export function useSnapmakerSerial() {
         homed,
         log,
         workPosition,
-        machinePosition,
         spindleOn,
         spindleSpeed,
         setSpindleOn,

@@ -26,14 +26,12 @@ function PinIcon({ className }: { className?: string }): ReactNode {
 
 function PositionColumn({
     axis,
-    machinePosition,
     workPosition,
     ready,
     onSetOrigin,
     onGoToOrigin,
 }: {
     axis: Axis;
-    machinePosition: AxisPosition | null;
     workPosition: AxisPosition | null;
     ready: boolean;
     onSetOrigin: () => void;
@@ -45,14 +43,9 @@ function PositionColumn({
             <span className="text-2xl font-semibold text-slate-500">
                 {axis}
             </span>
-            <div className="flex flex-col items-start justify-center gap-0.5">
-                <span className="font-mono text-sm text-slate-700 tabular-nums">
-                    {formatCoord(workPosition?.[key])}
-                </span>
-                <span className="font-mono text-xs text-slate-400 tabular-nums">
-                    {formatCoord(machinePosition?.[key])}
-                </span>
-            </div>
+            <span className="font-mono text-sm text-slate-700 tabular-nums">
+                {formatCoord(workPosition?.[key])}
+            </span>
             <button
                 type="button"
                 aria-label={`Set ${axis} work origin`}
@@ -78,13 +71,11 @@ function PositionColumn({
 export default function PositionPanel({
     ready,
     workPosition,
-    machinePosition,
     setWorkOrigin,
     goToOrigin,
 }: {
     ready: boolean;
     workPosition: AxisPosition | null;
-    machinePosition: AxisPosition | null;
     setWorkOrigin: (axes: Axis[]) => void;
     goToOrigin: (axes?: Axis[]) => void;
 }): ReactNode {
@@ -96,7 +87,6 @@ export default function PositionPanel({
                     <PositionColumn
                         key={axis}
                         axis={axis}
-                        machinePosition={machinePosition}
                         workPosition={workPosition}
                         ready={ready}
                         onSetOrigin={() => setWorkOrigin([axis])}

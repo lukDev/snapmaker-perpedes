@@ -18,7 +18,6 @@ function ControlPanels(): ReactNode {
         setFeedRate,
         pressed,
         workPosition,
-        machinePosition,
         setWorkOrigin,
         goToOrigin,
         discrete,
@@ -34,19 +33,19 @@ function ControlPanels(): ReactNode {
             <div>
                 <div className="flex h-0 min-h-full flex-col">
                     <MovementPanel
-                connected={connected}
-                homed={homed}
-                mode={mode}
-                setMode={setMode}
-                feedRate={feedRate}
-                setFeedRate={setFeedRate}
-                pressed={pressed}
-                workPosition={workPosition}
-                discrete={discrete}
-                drilling={drilling}
-                circle={circle}
-                gcode={gcode}
-            />
+                        connected={connected}
+                        homed={homed}
+                        mode={mode}
+                        setMode={setMode}
+                        feedRate={feedRate}
+                        setFeedRate={setFeedRate}
+                        pressed={pressed}
+                        workPosition={workPosition}
+                        discrete={discrete}
+                        drilling={drilling}
+                        circle={circle}
+                        gcode={gcode}
+                    />
                 </div>
             </div>
             <div className="flex flex-col items-stretch gap-6">
@@ -54,7 +53,6 @@ function ControlPanels(): ReactNode {
                 <PositionPanel
                     ready={connected && homed}
                     workPosition={workPosition}
-                    machinePosition={machinePosition}
                     setWorkOrigin={setWorkOrigin}
                     goToOrigin={goToOrigin}
                 />

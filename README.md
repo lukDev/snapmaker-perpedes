@@ -16,12 +16,12 @@ Manual control application for Snapmaker machines.
 
 Independent of the selected mode, the keys 1-8 (digit row or numpad) always nudge the machine by a fixed increment:
 
-| Key | Movement   | Key | Movement   |
-|-----|------------|-----|------------|
-| 1   | X+ 0.1mm   | 2   | X- 0.1mm   |
-| 3   | Y+ 0.1mm   | 4   | Y- 0.1mm   |
-| 5   | Z+ 0.1mm   | 6   | Z- 0.1mm   |
-| 7   | B+ 0.2°    | 8   | B- 0.2°    |
+| Key | Movement | Key | Movement |
+| --- | -------- | --- | -------- |
+| 1   | X+ 0.1mm | 2   | X- 0.1mm |
+| 3   | Y+ 0.1mm | 4   | Y- 0.1mm |
+| 5   | Z+ 0.1mm | 6   | Z- 0.1mm |
+| 7   | B+ 0.2°  | 8   | B- 0.2°  |
 
 Each keystroke (including auto-repeat while holding a key) queues one increment.
 Intended for use with a CNC jog wheel / macro pad that emits these keys.
@@ -60,6 +60,7 @@ This code has been tested on a Snapmaker 2.0 A350T.
 It should also work on other 2.0 machines and the Artisan, but this has never been verified.
 
 In general:
+
 > Use at your own risk!
 
 ## Technical Details

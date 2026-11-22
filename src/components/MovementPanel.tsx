@@ -99,61 +99,61 @@ export default function MovementPanel({
     const ready = connected && homed;
 
     const controls: Record<MovementMode, ReactNode> = {
-                        continuous: (
-                            <ContinuousJogControls
-                                pressed={pressed}
-                                ready={ready}
-                                speed={feedRate}
-                                setSpeed={setFeedRate}
-                            />
-                        ),
-                        discrete: (
-                            <DiscreteJogControls
-                                pressed={pressed}
-                                ready={ready}
-                                distance={discrete.distance}
-                                setDistance={discrete.setDistance}
-                                speed={feedRate}
-                                setSpeed={setFeedRate}
-                            />
-                        ),
-                        circle: (
-                            <CircleControls
-                                pressed={pressed}
-                                ready={ready}
-                                workPosition={workPosition}
-                                setOrigin={circle.setOrigin}
-                                angle={circle.angle}
-                                setAngle={circle.setAngle}
-                                speed={feedRate}
-                                setSpeed={setFeedRate}
-                            />
-                        ),
-                        drilling: (
-                            <DrillingControls
-                                pressed={pressed}
-                                ready={ready}
-                                maxDepth={drilling.maxDepth}
-                                setMaxDepth={drilling.setMaxDepth}
-                                downSpeed={drilling.downSpeed}
-                                setDownSpeed={drilling.setDownSpeed}
-                                upSpeed={drilling.upSpeed}
-                                setUpSpeed={drilling.setUpSpeed}
-                                status={drilling.status}
-                                descended={drilling.descended}
-                            />
-                        ),
-                        gcode: (
-                            <GcodeControls
-                                ready={ready}
-                                packets={gcode.packets}
-                                draftCode={gcode.draftCode}
-                                setDraftCode={gcode.setDraftCode}
-                                canSend={gcode.canSend}
-                                send={gcode.send}
-                                reuse={gcode.reuse}
-                            />
-                        ),
+        continuous: (
+            <ContinuousJogControls
+                pressed={pressed}
+                ready={ready}
+                speed={feedRate}
+                setSpeed={setFeedRate}
+            />
+        ),
+        discrete: (
+            <DiscreteJogControls
+                pressed={pressed}
+                ready={ready}
+                distance={discrete.distance}
+                setDistance={discrete.setDistance}
+                speed={feedRate}
+                setSpeed={setFeedRate}
+            />
+        ),
+        circle: (
+            <CircleControls
+                pressed={pressed}
+                ready={ready}
+                workPosition={workPosition}
+                setOrigin={circle.setOrigin}
+                angle={circle.angle}
+                setAngle={circle.setAngle}
+                speed={feedRate}
+                setSpeed={setFeedRate}
+            />
+        ),
+        drilling: (
+            <DrillingControls
+                pressed={pressed}
+                ready={ready}
+                maxDepth={drilling.maxDepth}
+                setMaxDepth={drilling.setMaxDepth}
+                downSpeed={drilling.downSpeed}
+                setDownSpeed={drilling.setDownSpeed}
+                upSpeed={drilling.upSpeed}
+                setUpSpeed={drilling.setUpSpeed}
+                status={drilling.status}
+                descended={drilling.descended}
+            />
+        ),
+        gcode: (
+            <GcodeControls
+                ready={ready}
+                packets={gcode.packets}
+                draftCode={gcode.draftCode}
+                setDraftCode={gcode.setDraftCode}
+                canSend={gcode.canSend}
+                send={gcode.send}
+                reuse={gcode.reuse}
+            />
+        ),
     };
 
     return (
